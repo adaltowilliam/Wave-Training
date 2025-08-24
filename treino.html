@@ -1,24 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
+  <!-- PWA / iOS full screen -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Wave Training">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Periodização Ondulatória — Treino 6x/semana</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f1115">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-  <!-- CSS responsivo -->
   <style>
     :root{
       --bg:#0f1115; --panel:#151923; --muted:#a6adbb; --text:#e8ecf1;
@@ -26,22 +21,22 @@
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;padding-bottom:env(safe-area-inset-bottom, 16px);}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;
+      padding-bottom:env(safe-area-inset-bottom, 16px);
+    }
 
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(15,17,21,.98), rgba(15,17,21,.86));position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(6px)}
+    header{
+      display:flex;gap:12px;align-items:center;justify-content:space-between;
+      padding:12px 16px;border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(15,17,21,.98), rgba(15,17,21,.86));
+      position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(6px)
+    }
     h1{font-size:clamp(1.15rem, 3.5vw, 1.6rem);margin:0 0 4px 0}
     .sub{font-size:12px;color:var(--muted)}
     .wrap{max-width:1200px;margin:0 auto;padding:12px}
     .rowlabel{color:var(--muted);font-size:12px;margin:6px 2px}
-
-    /* botões e select */
-    select, button{font:600 14px/1 system-ui; border:0; border-radius:10px; padding:10px 12px}
-    button{background:var(--accent); color:#07202a; cursor:pointer}
-    button:hover{background:var(--accent2)}
-    select{background:var(--card); color:var(--text); border:1px solid var(--border)}
-    @media (max-width:360px){
-      header .controls > *{flex:1 1 auto} button, select{width:100%}
-    }
 
     /* cards genéricos */
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;overflow:hidden}
@@ -94,13 +89,7 @@
       <div class="sub">Workspace: <code id="ws-label"></code></div>
       <div class="small" id="src-badge"></div>
     </div>
-    <div class="controls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <label>Semana:
-        <select id="week"></select>
-      </label>
-
-      <input type="file" id="fileInput" accept="application/json" style="display:none"/>
-    </div>
+    <!-- Controles removidos (Semana/Exportar/Importar) -->
   </header>
 
   <div class="wrap">
@@ -141,7 +130,7 @@
       enableIndexedDbPersistence, query, getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // === Firebase config (o seu) ===
+    // === Firebase config ===
     const firebaseConfig = {
       apiKey: "AIzaSyAN9B0dCAIfVPmGZ6qUUfC8k9KnrUT5ymI",
       authDomain: "treino-ondulatoriov5.firebaseapp.com",
@@ -171,21 +160,18 @@
       {id:9,reps:"12–15",treg:true},{id:10,reps:"4–6",treg:false},{id:11,reps:"8–10",treg:false},{id:12,reps:"12–15",treg:false}
     ];
 
+    // Como removemos o seletor: semana fixa
+    let currentWeekId = 1; // <- mude aqui se quiser começar em outra semana
     const repRangeLbl = document.getElementById('repRange');
-    const weekSelect = document.getElementById('week');
     const allExercisesList = document.getElementById('all-exercises-list');
     const workoutsRow = document.getElementById('workouts-row');
     const avgChartMessageDiv = document.getElementById('avgChart-message');
 
-    // Preenche o seletor de semanas + rótulo de reps
-    weeks.forEach(week => {
-      const option = document.createElement('option');
-      option.value = week.id;
-      option.textContent = `Semana ${week.id}`;
-      weekSelect.appendChild(option);
-    });
-    if (!weekSelect.value) weekSelect.value = weeks[0].id;
-    repRangeLbl.textContent = weeks[0].reps + (weeks[0].treg ? ' · TREG' : '');
+    // rótulo da semana atual
+    {
+      const wk = weeks.find(w => w.id === currentWeekId);
+      repRangeLbl.textContent = wk ? wk.reps + (wk.treg ? ' · TREG' : '') : '—';
+    }
 
     // Helpers
     const el=(t,a={})=>Object.assign(document.createElement(t),a);
@@ -248,7 +234,7 @@
     }
 
     async function saveWorkoutChanges(card, workoutId) {
-      const selectedWeek = weekSelect.value;
+      const selectedWeek = currentWeekId;
       const exercises = [];
       card.querySelectorAll('tbody tr').forEach(row => {
         const name  = row.querySelector('td:first-child').textContent.trim();
@@ -266,11 +252,11 @@
       await loadUserSchedule();
     }
 
-    // Carrega o cronograma do usuário
+    // Carrega o cronograma do usuário (sem seletor de semana)
     async function loadUserSchedule() {
-      const selectedWeek = weekSelect.value;
-      const weekMeta = weeks.find(w => w.id == selectedWeek);
-      repRangeLbl.textContent = weekMeta ? weekMeta.reps + (weekMeta.treg ? ' · TREG' : '') : '—';
+      const selectedWeek = currentWeekId;
+      const wkMeta = weeks.find(w => w.id == selectedWeek);
+      repRangeLbl.textContent = wkMeta ? wkMeta.reps + (wkMeta.treg ? ' · TREG' : '') : '—';
 
       const userRef = doc(db, 'users', userId);
       const userSnap = await getDoc(userRef);
@@ -354,7 +340,7 @@
       }
     }
     async function updateCharts(){
-      const selectedWeek = weekSelect.value;
+      const selectedWeek = currentWeekId;
       const weeklyVolumes = await getAllWeeksVolumes();
       const avgRows = await getWeekExerciseAvgRepsRows(selectedWeek);
 
@@ -401,8 +387,6 @@
       rows.sort((a,b)=>b.sumVol-a.sumVol-b.count+a.count);
       return rows;
     }
-
-    weekSelect.addEventListener('change', loadUserSchedule);
 
     // Init
     (async function init(){
