@@ -599,6 +599,17 @@ await setDoc(workoutRef, { name: nameFromTitle, exercises }, { merge: true });
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/Treinov5/service-worker.js');
     }
+
+
+(function () {
+    if (!('serviceWorker' in navigator)) return;
+    // Pages roda em HTTPS, então ok registrar:
+    navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
+  })();
+
+
+    
   </script>
+  
 </body>
 </html>
