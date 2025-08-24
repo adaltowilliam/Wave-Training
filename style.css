@@ -1,0 +1,44 @@
+/* ===== WaveTraining — estilo global ===== */
+
+/* Cores da identidade */
+:root{
+  --accent:#39ff14;   /* verde-limão (energia) */
+  --warm:#ff6600;     /* laranja (intensidade) */
+}
+
+/* Garantir que o background ocupe a tela toda */
+html, body { height: 100%; margin: 0; }
+
+/* Fundo com a onda azul */
+body{
+  font-family: system-ui, Arial, "Segoe UI", sans-serif;
+  color: #fff;
+  background: url(fundo.png) no-repeat center center fixed;
+  background-size: cover;
+}
+
+/* Camada sutil por cima do fundo para melhorar a leitura */
+body::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(transparent 40%, rgba(0,0,0,.55) 70%),
+    linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.6));
+  pointer-events: none; /* não bloqueia cliques */
+}
+
+/* Botões padrão */
+button{
+  background: var(--accent);
+  color: #000;
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover{
+  background: var(--warm);
+  color: #fff;
+}
