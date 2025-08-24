@@ -11,21 +11,10 @@ html, body { height: 100%; margin: 0; }
 html, body { min-height: 100dvh; background-color:#0b0f14; } /* fallback escuro */
 
 /* Fundo com overlays + imagem (na mesma propriedade) */
-body{
-  font-family: system-ui, Arial, "Segoe UI", sans-serif;
-  color: #fff;
-
-  /* 1) vinheta suave | 2) véu de leitura | 3) imagem */
-  background-image:
-    radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 85%),
-    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)),
-    url("fundo.png");
-
-  background-position: center center, center center, center center;
-  background-size: 100% 100%, 100% 100%, cover;
-  background-repeat: no-repeat, no-repeat, no-repeat;
-  background-attachment: fixed, fixed, fixed; /* parallax suave e estável */
+body {
+  background: red !important;
 }
+
 
 /* Botões padrão */
 button{
