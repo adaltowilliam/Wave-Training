@@ -1,158 +1,46 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <!-- iOS PWA metas -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Wave Training">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+/* ===== WaveTraining — estilo global ===== */
 
-  <!-- Chama a imagem de fundo -->
-  <link rel="stylesheet" href="style.css?v=1">
-  
-  <!-- Manifest / tema -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f1115">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+/* Paleta */
+:root{
+  --accent:#39ff14;   /* verde-limão */
+  --warm:#ff6600;     /* laranja */
+}
 
-  <title>Selecione um Usuário</title>
+/* Reset e altura cheia */
+html, body { height: 100%; margin: 0; }
+html, body { min-height: 100dvh; background-color:#0b0f14; } /* fallback escuro */
 
-  <style>
-    :root{
-      --bg:#0f1115; --panel:#151923; --text:#e8ecf1; --muted:#9aa3b2;
-      --accent:#6ee7ff; --card:#1b2230; --border:#273043;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      background: transparent; /* <<< agora deixa o style.css controlar o fundo */
-      color:var(--text);
-      font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;
-    }
-    .app-root{min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 16px)}
-    .container{width:min(640px, 100%); background:transparent}
-    h1{margin:0 0 12px; font-size:clamp(1.3rem, 4.5vw, 2rem)}
-    .user-list{display:flex; flex-direction:column; gap:10px; margin-top:16px}
-    .user-card{
-      background:var(--card); border:1px solid var(--border); border-radius:12px;
-      padding:14px; cursor:pointer; transition:transform .06s ease, background-color .2s;
-      touch-action:manipulation;
-    }
-    .user-card:active{transform:scale(.99)}
-    .user-card:hover{background-color:#2a374c}
-    .add-user-form{display:flex; gap:10px; margin-top:18px; width:100%}
-    .add-user-form input{
-      flex:1; padding:12px; border-radius:10px; border:1px solid var(--border);
-      background:var(--card); color:var(--text);
-    }
-    .add-user-form button{
-      padding:12px 16px; border-radius:10px; border:none; font-weight:700; cursor:pointer;
-      background:var(--accent); color:#062029;
-    }
-    .empty{color:var(--muted)}
-  </style>
-</head>
-<body>
-  <div class="app-root">
-    <div class="container">
-      <h1>Selecione um Usuário</h1>
+/* Fundo com overlays + imagem (na mesma propriedade) */
+body{
+  font-family: system-ui, Arial, "Segoe UI", sans-serif;
+  color: #fff;
 
-      <div class="user-list" id="user-list"></div>
+  /* 1) vinheta suave | 2) véu de leitura | 3) imagem */
+  background-image:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 85%),
+    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)),
+    url("fundo.png");
 
-      <form class="add-user-form" id="add-user-form">
-        <input type="text" id="new-user-name" placeholder="Digite o nome do novo usuário" autocomplete="name" />
-        <button type="submit">Adicionar</button>
-      </form>
-    </div>
-  </div>
+  background-position: center center, center center, center center;
+  background-size: 100% 100%, 100% 100%, cover;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed; /* parallax suave e estável */
+}
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+/* Botões padrão */
+button{
+  background: var(--accent);
+  color: #000;
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover{
+  background: var(--warm);
+  color: #fff;
+}
 
-    // Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAN9B0dCAIfVPmGZ6qUUfC8k9KnrUT5ymI",
-      authDomain: "treino-ondulatoriov5.firebaseapp.com",
-      projectId: "treino-ondulatoriov5",
-      storageBucket: "treino-ondulatoriov5.firebasestorage.app",
-      messagingSenderId: "152908725685",
-      appId: "1:152908725685:web:ca42dc3714fe07af162dfc"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    signInAnonymously(auth).catch(console.warn);
-
-    const userListContainer = document.getElementById('user-list');
-    const form = document.getElementById('add-user-form');
-    const userNameInput = document.getElementById('new-user-name');
-
-    async function loadUsers() {
-      userListContainer.innerHTML = '';
-      const qUsers = query(collection(db, 'users'));
-      const snap = await getDocs(qUsers);
-
-      if (snap.empty) {
-        const noUsers = document.createElement('div');
-        noUsers.className = 'empty';
-        noUsers.textContent = 'Nenhum usuário encontrado. Adicione um novo!';
-        userListContainer.appendChild(noUsers);
-        return;
-      }
-
-      snap.forEach(docSnap => {
-        const data = docSnap.data();
-        const card = document.createElement('div');
-        card.className = 'user-card';
-        card.textContent = data.name || 'Usuário sem nome';
-        card.dataset.userId = docSnap.id;
-        card.addEventListener('click', () => checkAndRedirect(docSnap.id));
-        userListContainer.appendChild(card);
-      });
-    }
-
-    async function addUser(userName) {
-      const name = (userName || '').trim();
-      if (!name) return;
-
-      await addDoc(collection(db, 'users'), {
-        name,
-        createdAt: new Date()
-      });
-
-      userNameInput.value = '';
-      await loadUsers();
-    }
-
-    async function checkAndRedirect(userId) {
-      const userRef = doc(db, 'users', userId);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists() && userSnap.data().trainingDays) {
-        // vai direto pro treino
-        window.location.href = `treino.html?ws=${userId}`;
-      } else {
-        // configurar dias primeiro
-        window.location.href = `choose_days.html?ws=${userId}`;
-      }
-    }
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      addUser(userNameInput.value);
-    });
-
-    loadUsers();
-  </script>
-
-  <!-- Service Worker (uma vez só, relativo) -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
-    }
-  </script>
-</body>
-</html>
+/* Deixe blocos principais transparentes para não “tampar” o fundo */
+.container, .card, .panel { background: transparent; }
