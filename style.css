@@ -1,35 +1,36 @@
-/* ===== WaveTraining — estilo global ===== */
+/* ===== WaveTraining — fundo fixo robusto ===== */
 
-/* Paleta */
-:root{
-  --accent:#39ff14;   /* verde-limão */
-  --warm:#ff6600;     /* laranja */
+/* Zere cores sólidas raiz */
+html, body{
+  height: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  background: transparent !important;
 }
 
-/* Reset e altura cheia */
-html, body { height: 100%; margin: 0; }
-html, body { min-height: 100dvh; background-color:#0b0f14; } /* fallback escuro */
-
-/* Fundo com overlays + imagem (na mesma propriedade) */
-body{
-  background: url("Imagens/fundo.png") no-repeat center/cover fixed !important;
+/* Imagem fixa atrás de tudo */
+body::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;                /* atrás de todo o conteúdo */
+  background: url("Imagens/fundo.png") center/cover no-repeat;
+  pointer-events: none;
 }
 
-
-/* Botões padrão */
-button{
-  background: var(--accent);
-  color: #000;
-  border: 0;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-}
-button:hover{
-  background: var(--warm);
-  color: #fff;
+/* Overlays de leitura (suaves) acima da imagem */
+body::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.45) 85%),
+    linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.55));
+  pointer-events: none;
 }
 
-/* Deixe blocos principais transparentes para não “tampar” o fundo */
-.container, .card, .panel { background: transparent; }
+/* Garanta que wrappers não pintem a página inteira */
+.app-root, .page, .container, main, section, footer{
+  background: transparent !important;
+}
