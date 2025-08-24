@@ -87,7 +87,17 @@
         });
         
         loadUserName();
+
+
+(function () {
+    if (!('serviceWorker' in navigator)) return;
+    // Pages roda em HTTPS, então ok registrar:
+    navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
+  })();
+
+        
     </script>
 </body>
 
 </html>
+
