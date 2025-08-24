@@ -6,7 +6,6 @@
   <meta name="apple-mobile-web-app-title" content="Wave Training">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
   <meta charset="utf-8" />
   <title>Periodização Ondulatória — Treino 6x/semana</title>
 
@@ -21,11 +20,7 @@
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{
-      margin:0;background:var(--bg);color:var(--text);
-      font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;
-      padding-bottom:env(safe-area-inset-bottom, 16px);
-    }
+    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;padding-bottom:env(safe-area-inset-bottom, 16px);}
 
     header{
       display:flex;gap:12px;align-items:center;justify-content:space-between;
@@ -37,6 +32,17 @@
     .sub{font-size:12px;color:var(--muted)}
     .wrap{max-width:1200px;margin:0 auto;padding:12px}
     .rowlabel{color:var(--muted);font-size:12px;margin:6px 2px}
+
+    /* controle de semana minimalista */
+    .wkctl{display:flex;align-items:center;gap:8px}
+    .wkbtn{
+      background:var(--card); border:1px solid var(--border); color:var(--text);
+      width:34px; height:34px; border-radius:10px; font:600 18px/1 system-ui; cursor:pointer;
+    }
+    .wklabel{
+      padding:6px 10px; border-radius:10px; background:var(--card); border:1px solid var(--border);
+      font:600 13px/1 system-ui; color:var(--text);
+    }
 
     /* cards genéricos */
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;overflow:hidden}
@@ -89,7 +95,13 @@
       <div class="sub">Workspace: <code id="ws-label"></code></div>
       <div class="small" id="src-badge"></div>
     </div>
-    <!-- Controles removidos (Semana/Exportar/Importar) -->
+
+    <!-- Semana: setas discretas -->
+    <div class="wkctl">
+      <button id="wkPrev" class="wkbtn" aria-label="Semana anterior">‹</button>
+      <span id="wkLabel" class="wklabel">Semana 1</span>
+      <button id="wkNext" class="wkbtn" aria-label="Próxima semana">›</button>
+    </div>
   </header>
 
   <div class="wrap">
@@ -160,18 +172,29 @@
       {id:9,reps:"12–15",treg:true},{id:10,reps:"4–6",treg:false},{id:11,reps:"8–10",treg:false},{id:12,reps:"12–15",treg:false}
     ];
 
-    // Como removemos o seletor: semana fixa
-    let currentWeekId = 1; // <- mude aqui se quiser começar em outra semana
+    let currentWeekId = 1; // padrão
+    const wkLabelEl = document.getElementById('wkLabel');
     const repRangeLbl = document.getElementById('repRange');
     const allExercisesList = document.getElementById('all-exercises-list');
     const workoutsRow = document.getElementById('workouts-row');
     const avgChartMessageDiv = document.getElementById('avgChart-message');
 
-    // rótulo da semana atual
-    {
+    function updateWeekLabel(){
+      wkLabelEl.textContent = `Semana ${currentWeekId}`;
       const wk = weeks.find(w => w.id === currentWeekId);
       repRangeLbl.textContent = wk ? wk.reps + (wk.treg ? ' · TREG' : '') : '—';
     }
+    function setWeek(newId){
+      const clamped = Math.max(1, Math.min(12, newId));
+      if (clamped !== currentWeekId){
+        currentWeekId = clamped;
+        updateWeekLabel();
+        loadUserSchedule().then(updateCharts);
+      }
+    }
+    updateWeekLabel();
+    document.getElementById('wkPrev').addEventListener('click', ()=> setWeek(currentWeekId-1));
+    document.getElementById('wkNext').addEventListener('click', ()=> setWeek(currentWeekId+1));
 
     // Helpers
     const el=(t,a={})=>Object.assign(document.createElement(t),a);
@@ -252,7 +275,7 @@
       await loadUserSchedule();
     }
 
-    // Carrega o cronograma do usuário (sem seletor de semana)
+    // Carrega o cronograma do usuário (movendo por semanas com setas)
     async function loadUserSchedule() {
       const selectedWeek = currentWeekId;
       const wkMeta = weeks.find(w => w.id == selectedWeek);
@@ -398,7 +421,7 @@
     })();
   </script>
 
-  <!-- SW (uma vez só) -->
+  <!-- SW -->
   <script>
     (function () {
       if (!('serviceWorker' in navigator)) return;
