@@ -1,31 +1,30 @@
 /* ===== WaveTraining — estilo global ===== */
 
-/* Cores da identidade */
+/* Paleta */
 :root{
-  --accent:#39ff14;   /* verde-limão (energia) */
-  --warm:#ff6600;     /* laranja (intensidade) */
+  --accent:#39ff14;   /* verde-limão */
+  --warm:#ff6600;     /* laranja */
 }
 
-/* Garantir que o background ocupe a tela toda */
+/* Reset e altura cheia */
 html, body { height: 100%; margin: 0; }
+html, body { min-height: 100dvh; background-color:#0b0f14; } /* fallback escuro */
 
-/* Fundo com a onda azul */
+/* Fundo com overlays + imagem (na mesma propriedade) */
 body{
   font-family: system-ui, Arial, "Segoe UI", sans-serif;
   color: #fff;
-  background: url(fundo.png) no-repeat center center fixed;
-  background-size: cover;
-}
 
-/* Camada sutil por cima do fundo para melhorar a leitura */
-body::before{
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(transparent 40%, rgba(0,0,0,.55) 70%),
-    linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.6));
-  pointer-events: none; /* não bloqueia cliques */
+  /* 1) vinheta suave | 2) véu de leitura | 3) imagem */
+  background-image:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 85%),
+    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)),
+    url("fundo.png");
+
+  background-position: center center, center center, center center;
+  background-size: 100% 100%, 100% 100%, cover;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed; /* parallax suave e estável */
 }
 
 /* Botões padrão */
@@ -42,3 +41,6 @@ button:hover{
   background: var(--warm);
   color: #fff;
 }
+
+/* Deixe blocos principais transparentes para não “tampar” o fundo */
+.container, .card, .panel { background: transparent; }
