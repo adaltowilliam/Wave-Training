@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <!-- PWA / iOS full screen -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Periodização Ondulatória — Treino 6x/semana</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f1115">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Wave Training">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta charset="utf-8" />
-  <title>Periodização Ondulatória — Treino 6x/semana</title>
-
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f1115">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <style>
@@ -22,26 +22,24 @@
     html{scroll-behavior:smooth}
     body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;padding-bottom:env(safe-area-inset-bottom, 16px);}
 
-    header{
-      display:flex;gap:12px;align-items:center;justify-content:space-between;
-      padding:12px 16px;border-bottom:1px solid var(--border);
-      background:linear-gradient(180deg, rgba(15,17,21,.98), rgba(15,17,21,.86));
-      position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(6px)
-    }
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(15,17,21,.98), rgba(15,17,21,.86));position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(6px)}
     h1{font-size:clamp(1.15rem, 3.5vw, 1.6rem);margin:0 0 4px 0}
     .sub{font-size:12px;color:var(--muted)}
     .wrap{max-width:1200px;margin:0 auto;padding:12px}
     .rowlabel{color:var(--muted);font-size:12px;margin:6px 2px}
 
-    /* controle de semana minimalista */
-    .wkctl{display:flex;align-items:center;gap:8px}
-    .wkbtn{
-      background:var(--card); border:1px solid var(--border); color:var(--text);
-      width:34px; height:34px; border-radius:10px; font:600 18px/1 system-ui; cursor:pointer;
-    }
-    .wklabel{
-      padding:6px 10px; border-radius:10px; background:var(--card); border:1px solid var(--border);
-      font:600 13px/1 system-ui; color:var(--text);
+    /* controles */
+    select, button{font:600 14px/1 system-ui; border:0; border-radius:10px; padding:10px 12px}
+    select{background:var(--card); color:var(--text); border:1px solid var(--border)}
+    button{background:var(--accent); color:#07202a; cursor:pointer}
+    button:hover{background:var(--accent2)}
+    .wkbtn.done{ background:var(--accent2); color:var(--card); }
+    #wkLabel.done::after{ content:" ✓"; color:var(--accent2); font-weight:700; }
+
+    @media (max-width:360px){
+      header .controls{flex-wrap:wrap}
+      header .controls > *{flex:1 1 auto}
+      button, select{width:100%}
     }
 
     /* cards genéricos */
@@ -95,12 +93,11 @@
       <div class="sub">Workspace: <code id="ws-label"></code></div>
       <div class="small" id="src-badge"></div>
     </div>
-
-    <!-- Semana: setas discretas -->
-    <div class="wkctl">
-      <button id="wkPrev" class="wkbtn" aria-label="Semana anterior">‹</button>
-      <span id="wkLabel" class="wklabel">Semana 1</span>
-      <button id="wkNext" class="wkbtn" aria-label="Próxima semana">›</button>
+    <div class="controls" style="display:flex;gap:8px;align-items:center">
+      <label id="wkLabel">Semana:
+        <select id="week"></select>
+      </label>
+      <button id="wkDoneBtn" class="wkbtn" title="Concluir/Reabrir semana">Concluir semana</button>
     </div>
   </header>
 
@@ -139,10 +136,10 @@
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import {
       getFirestore, collection, doc, getDoc, setDoc,
-      enableIndexedDbPersistence, query, getDocs
+      enableIndexedDbPersistence, query, getDocs, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // === Firebase config ===
+    // === Firebase config (o seu) ===
     const firebaseConfig = {
       apiKey: "AIzaSyAN9B0dCAIfVPmGZ6qUUfC8k9KnrUT5ymI",
       authDomain: "treino-ondulatoriov5.firebaseapp.com",
@@ -155,6 +152,7 @@
     // Workspace (?ws=) — ID do usuário
     const params = new URLSearchParams(location.search);
     const rawWs = (params.get('ws') || '').trim();
+    const wkFromUrl = Number(params.get('wk'));
     if (!rawWs) { location.href = 'index.html'; }
     const userId = rawWs;
     document.getElementById('ws-label').textContent = userId;
@@ -172,31 +170,23 @@
       {id:9,reps:"12–15",treg:true},{id:10,reps:"4–6",treg:false},{id:11,reps:"8–10",treg:false},{id:12,reps:"12–15",treg:false}
     ];
 
-    let currentWeekId = 1; // padrão
-    const wkLabelEl = document.getElementById('wkLabel');
     const repRangeLbl = document.getElementById('repRange');
+    const weekSelect = document.getElementById('week');
+    const wkDoneBtn  = document.getElementById('wkDoneBtn');
+    const wkLabelEl  = document.getElementById('wkLabel');
     const allExercisesList = document.getElementById('all-exercises-list');
     const workoutsRow = document.getElementById('workouts-row');
     const avgChartMessageDiv = document.getElementById('avgChart-message');
 
-    function updateWeekLabel(){
-      wkLabelEl.textContent = `Semana ${currentWeekId}`;
-      const wk = weeks.find(w => w.id === currentWeekId);
-      repRangeLbl.textContent = wk ? wk.reps + (wk.treg ? ' · TREG' : '') : '—';
-    }
-    function setWeek(newId){
-      const clamped = Math.max(1, Math.min(12, newId));
-      if (clamped !== currentWeekId){
-        currentWeekId = clamped;
-        updateWeekLabel();
-        loadUserSchedule().then(updateCharts);
-      }
-    }
-    updateWeekLabel();
-    document.getElementById('wkPrev').addEventListener('click', ()=> setWeek(currentWeekId-1));
-    document.getElementById('wkNext').addEventListener('click', ()=> setWeek(currentWeekId+1));
+    // preencher semanas
+    weeks.forEach(week => {
+      const opt = document.createElement('option');
+      opt.value = week.id;
+      opt.textContent = `Semana ${week.id}`;
+      weekSelect.appendChild(opt);
+    });
 
-    // Helpers
+    // helpers
     const el=(t,a={})=>Object.assign(document.createElement(t),a);
     const formatNum=n=>(Number(n)||0).toLocaleString('pt-BR',{maximumFractionDigits:2});
     const vol=o=>Math.round((Number(o.sets)||0)*(Number(o.reps)||0)*(Number(o.carga)||0)*100)/100;
@@ -207,7 +197,100 @@
       container.append(totalsWrap);
     }
 
-    // Monta um card de dia
+    // ====== Progresso de semanas ======
+    let currentWeekId = 1;
+    let weekStatus = {}; // { "1": {completed:true, completedAt:...}, ... }
+
+    async function loadProgress() {
+      const userRef = doc(db, 'users', userId);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) return { currentWeek: null, weekStatus: {} };
+      const data = snap.data() || {};
+      weekStatus = data.weekStatus || {};
+      return { currentWeek: Number(data.currentWeek) || null, weekStatus };
+    }
+
+    async function setCurrentWeek(weekId){
+      await setDoc(doc(db, 'users', userId), { currentWeek: weekId }, { merge: true });
+    }
+
+    async function saveWeekStatus(weekId, completed){
+      const patch = { [`weekStatus.${weekId}.completed`]: completed };
+      if (completed) patch[`weekStatus.${weekId}.completedAt`] = serverTimestamp();
+      await setDoc(doc(db, 'users', userId), patch, { merge: true });
+      weekStatus[weekId] = { ...(weekStatus[weekId]||{}), completed };
+    }
+
+    function isWeekCompleted(id){ return !!weekStatus?.[id]?.completed; }
+
+    function refreshWeekDoneUI(){
+      const done = isWeekCompleted(currentWeekId);
+      wkDoneBtn.textContent = done ? 'Reabrir semana' : 'Concluir semana';
+      wkDoneBtn.classList.toggle('done', done);
+      wkLabelEl.classList.toggle('done', done);
+    }
+
+    async function pickInitialWeek(){
+      const { currentWeek, weekStatus: ws } = await loadProgress();
+      // 1) URL tem wk?
+      if (wkFromUrl >= 1 && wkFromUrl <= 12){
+        currentWeekId = wkFromUrl;
+        await setCurrentWeek(currentWeekId);
+        return;
+      }
+      // 2) tem currentWeek salvo?
+      if (currentWeek && currentWeek >=1 && currentWeek <=12){
+        currentWeekId = currentWeek;
+        return;
+      }
+      // 3) primeira não concluída; senão 12
+      for (let i=1;i<=12;i++){
+        if (!ws?.[i]?.completed){ currentWeekId = i; return; }
+      }
+      currentWeekId = 12;
+    }
+
+    function updateWeekLabel(){
+      weekSelect.value = String(currentWeekId);
+      const w = weeks.find(x=>x.id==currentWeekId);
+      repRangeLbl.textContent = w ? w.reps + (w.treg ? ' · TREG' : '') : '—';
+    }
+
+    wkDoneBtn.addEventListener('click', async ()=>{
+      const done = isWeekCompleted(currentWeekId);
+      const newState = !done;
+      await saveWeekStatus(currentWeekId, newState);
+
+      if (newState){
+        // avançar para próxima não concluída
+        let next = currentWeekId;
+        for (let i=currentWeekId+1;i<=12;i++){
+          if (!isWeekCompleted(i)){ next = i; break; }
+          next = i; // se todas concluídas até o fim, fica na última
+        }
+        currentWeekId = next;
+        await setCurrentWeek(currentWeekId);
+      } else {
+        // reabriu: fica nela
+        await setCurrentWeek(currentWeekId);
+      }
+
+      updateWeekLabel();
+      refreshWeekDoneUI();
+      await loadUserSchedule();
+      await updateCharts();
+    });
+
+    weekSelect.addEventListener('change', async ()=>{
+      currentWeekId = Number(weekSelect.value) || 1;
+      await setCurrentWeek(currentWeekId);
+      updateWeekLabel();
+      refreshWeekDoneUI();
+      await loadUserSchedule();
+      await updateCharts();
+    });
+
+    // ====== UI de treino ======
     function createWorkoutDayCard(dayName, workout, workoutId) {
       const card = document.createElement('section');
       card.className = 'day-card card workout-day-card';
@@ -257,7 +340,6 @@
     }
 
     async function saveWorkoutChanges(card, workoutId) {
-      const selectedWeek = currentWeekId;
       const exercises = [];
       card.querySelectorAll('tbody tr').forEach(row => {
         const name  = row.querySelector('td:first-child').textContent.trim();
@@ -269,17 +351,15 @@
       const title = card.querySelector('h3')?.textContent || '';
       const nameFromTitle = title.includes('·') ? title.split('·')[1].trim() : title.trim();
 
-      const workoutRef = doc(db, `users/${userId}/weeks/${selectedWeek}/workouts`, workoutId);
+      const workoutRef = doc(db, `users/${userId}/weeks/${currentWeekId}/workouts`, workoutId);
       await setDoc(workoutRef, { name: nameFromTitle, exercises }, { merge: true });
       alert("Alterações salvas com sucesso!");
       await loadUserSchedule();
     }
 
-    // Carrega o cronograma do usuário (movendo por semanas com setas)
     async function loadUserSchedule() {
-      const selectedWeek = currentWeekId;
-      const wkMeta = weeks.find(w => w.id == selectedWeek);
-      repRangeLbl.textContent = wkMeta ? wkMeta.reps + (wkMeta.treg ? ' · TREG' : '') : '—';
+      const wMeta = weeks.find(w => w.id == currentWeekId);
+      repRangeLbl.textContent = wMeta ? wMeta.reps + (wMeta.treg ? ' · TREG' : '') : '—';
 
       const userRef = doc(db, 'users', userId);
       const userSnap = await getDoc(userRef);
@@ -291,7 +371,7 @@
         const uniqueIds = [...new Set(workoutIds)];
 
         const baseSnaps = await Promise.all(uniqueIds.map(id => getDoc(doc(db, `users/${userId}/workouts/${id}`))));
-        const weekSnaps = await Promise.all(uniqueIds.map(id => getDoc(doc(db, `users/${userId}/weeks/${selectedWeek}/workouts/${id}`))));
+        const weekSnaps = await Promise.all(uniqueIds.map(id => getDoc(doc(db, `users/${userId}/weeks/${currentWeekId}/workouts/${id}`))));
 
         const map = {};
         baseSnaps.forEach(s => { if (s.exists()) map[s.id] = {...(map[s.id]||{}), ...s.data()}; });
@@ -339,7 +419,7 @@
         ul.style.gap = '10px';
         exercises.forEach(ex => {
           const li = document.createElement('li');
-          const name = ex.split(' - ')[1] || ex;
+          const name = (ex || '').split(' - ')[1] || ex || '';
           li.textContent = name;
           ul.appendChild(li);
         });
@@ -363,9 +443,8 @@
       }
     }
     async function updateCharts(){
-      const selectedWeek = currentWeekId;
       const weeklyVolumes = await getAllWeeksVolumes();
-      const avgRows = await getWeekExerciseAvgRepsRows(selectedWeek);
+      const avgRows = await getWeekExerciseAvgRepsRows(currentWeekId);
 
       if(weeklyChart){ weeklyChart.data.datasets[0].data = weeklyVolumes; weeklyChart.update(); }
 
@@ -415,13 +494,18 @@
     (async function init(){
       signInAnonymously(auth).catch(console.error);
       document.getElementById('testStatus').textContent = 'Autotestes: 1/1 OK';
+
+      await pickInitialWeek();
+      updateWeekLabel();
+      refreshWeekDoneUI();
+
       await loadUserSchedule();
       await buildChartsIfNeeded();
       await updateCharts();
     })();
   </script>
 
-  <!-- SW -->
+  <!-- SW (uma vez só) -->
   <script>
     (function () {
       if (!('serviceWorker' in navigator)) return;
