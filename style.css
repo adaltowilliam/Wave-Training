@@ -19,7 +19,7 @@ body{
   background-image:
     radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 85%),
     linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)),
-    url("https://adaltowilliam.github.io/Wave-Training/fundo.png");
+    url("fundo.png");
 
   background-position: center center, center center, center center;
   background-size: 100% 100%, 100% 100%, cover;
