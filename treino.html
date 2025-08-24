@@ -1,204 +1,83 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
-
-<style>
-  /* Base legível no mobile */
-  :root{
-    --bg:#0f1115; --card:#171c25; --muted:#9aa3b2; --accent:#6ee7ff;
-  }
-  html{scroll-behavior:smooth}
-  body{background:var(--bg); color:#e8ecf1; padding-bottom:env(safe-area-inset-bottom, 16px);}
-
-  /* Títulos e textos com clamp: ajusta automático por viewport */
-  h1{font-size:clamp(1.15rem, 3.5vw, 1.6rem); line-height:1.2; margin:12px 12px 8px;}
-  h3{font-size:clamp(1rem, 3vw, 1.2rem); margin:0 0 8px 0;}
-
-  /* Header fixo (sem sumir) e compacto em telas pequenas */
-  .header, header{
-    position:sticky; top:0; z-index:10;
-    background:linear-gradient(180deg, rgba(15,17,21,.98), rgba(15,17,21,.86));
-    backdrop-filter:saturate(140%) blur(6px);
-    padding:8px 12px;
-    border-bottom:1px solid rgba(255,255,255,.06);
-  }
-  .header .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-  select, button{font:600 14px/1 system-ui; border:0; border-radius:10px; padding:10px 12px}
-  button{background:var(--accent); color:#07202a}
-  @media (max-width:360px){
-    .header .row > *{flex:1 1 auto} /* botões ocupam a largura */
-    button, select{width:100%}
-  }
-
-  /* LISTA DE DIAS: carrossel horizontal com snap */
-  .days{display:flex; gap:12px; padding:12px; overflow-x:auto; scroll-snap-type:x mandatory}
-  .days::-webkit-scrollbar{height:6px}
-  .days::-webkit-scrollbar-thumb{background:#2a3140; border-radius:999px}
-
-  .day-card{
-    flex:0 0 85vw;               /* ocupa ~85% da tela */
-    max-width:360px;             /* e não passa disso em telas maiores */
-    scroll-snap-align:start;
-    background:var(--card);
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:16px;
-    padding:12px;
-    box-shadow:0 6px 22px rgba(0,0,0,.25);
-  }
-
-  /* Tabela mais compacta e legível */
-  .day-card table{width:100%; border-collapse:separate; border-spacing:0 8px}
-  .day-card th{font-size:.8rem; color:var(--muted); font-weight:600; text-align:left}
-  .day-card td{font-size:.95rem; padding:6px 8px; vertical-align:middle; background:#11161f; border-radius:8px}
-  .day-card td:first-child{
-    word-break:break-word; hyphens:auto; line-height:1.2;
-  }
-  .sets-input,.reps-input,.carga-input{
-    width:3.8ch; text-align:center; font-weight:700; font-size:.95rem;
-    border-radius:8px; border:1px solid #2a3140; background:#0c1119; color:#e8ecf1; padding:6px 4px;
-  }
-
-  /* Cards vazios: some com a “telinha branca” */
-  .card:empty,[data-empty="true"]{display:none !important}
-
-  /* Em telas maiores, vira grade bonitinha */
-  @media (min-width:992px){
-    .days{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); overflow:visible}
-    .day-card{flex:1 1 auto; max-width:unset}
-  }
-</style>
-
-
-
-  
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f1115">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/Treinov5/icons/icon-180.png">
-  
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Periodização Ondulatória — Treino 6x/semana</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f1115">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <!-- CSS responsivo -->
   <style>
-    :root{ --bg:#0f1115; --panel:#151923; --muted:#a6adbb; --text:#e8ecf1; --accent:#6ee7ff; --accent2:#a78bfa; --card:#1b2230; --border:#273043; --yellow:#facc15; }
+    :root{
+      --bg:#0f1115; --panel:#151923; --muted:#a6adbb; --text:#e8ecf1;
+      --accent:#6ee7ff; --accent2:#a78bfa; --card:#1b2230; --border:#273043; --yellow:#facc15;
+    }
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial}
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--panel);position:sticky;top:0;z-index:5}
-    h1{font-size:18px;margin:0}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;padding-bottom:env(safe-area-inset-bottom, 16px);}
+
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(15,17,21,.98), rgba(15,17,21,.86));position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(6px)}
+    h1{font-size:clamp(1.15rem, 3.5vw, 1.6rem);margin:0 0 4px 0}
     .sub{font-size:12px;color:var(--muted)}
-    .wrap{max-width:1200px;margin:0 auto;padding:18px}
-    .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .wrap{max-width:1200px;margin:0 auto;padding:12px}
+    .rowlabel{color:var(--muted);font-size:12px;margin:6px 2px}
+
+    /* botões e select */
+    select, button{font:600 14px/1 system-ui; border:0; border-radius:10px; padding:10px 12px}
+    button{background:var(--accent); color:#07202a; cursor:pointer}
+    button:hover{background:var(--accent2)}
+    select{background:var(--card); color:var(--text); border:1px solid var(--border)}
+    @media (max-width:360px){
+      header .controls > *{flex:1 1 auto} button, select{width:100%}
+    }
+
+    /* cards genéricos */
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;overflow:hidden}
-    .day{grid-column:span 4;display:flex;flex-direction:column;min-width:300px}
-    .rest{border:1px dashed var(--border);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;min-height:160px}
     .title{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-    .pill{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
-    .pill.accent{border-color:var(--accent);color:var(--accent)}
-    .pill.treg{border-color:var(--yellow);color:var(--yellow)}
-    table{width:100%;border-collapse:collapse;table-layout:fixed}
-    th,td{border-bottom:1px solid var(--border);padding:6px 4px;text-align:left;vertical-align:top}
-    th{font-size:12px;color:var(--muted);font-weight:600}
-    input, textarea{font:15px/1.3 system-ui,Segoe UI,Roboto,Helvetica,Arial; font-variant-numeric: tabular-nums;}
-    td input, td textarea{width:100%;background:#0d1117;border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px}
-    td:nth-child(2) input, td:nth-child(3) input, td:nth-child(4) input { font-size:16px; font-weight:700; text-align:center; }
-    td textarea.namefield{min-height:48px;line-height:1.25;resize:vertical;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere}
-    input[type=number]{padding-right:6px;appearance:textfield}
-    input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
-    input[type=number]{ -moz-appearance:textfield; }
-    .hint{color:var(--muted);font-size:12px;margin-top:6px}
-    .rowlabel{grid-column:1/-1;color:var(--muted);font-size:12px;margin:6px 2px}
     .small{font-size:11px;color:var(--muted)}
     .empty{padding:10px;border:1px dashed var(--border);border-radius:10px;color:var(--muted);text-align:center}
-    .src-badge{font-size:11px;color:var(--muted)}
+
+    /* carrossel de dias */
+    .days{display:flex; gap:12px; padding:12px; overflow-x:auto; scroll-snap-type:x mandatory}
+    .days::-webkit-scrollbar{height:6px}
+    .days::-webkit-scrollbar-thumb{background:#2a3140; border-radius:999px}
+    .day-card{
+      flex:0 0 85vw; max-width:360px; scroll-snap-align:start;
+      background:var(--card); border:1px solid rgba(255,255,255,.06);
+      border-radius:16px; padding:12px; box-shadow:0 6px 22px rgba(0,0,0,.25);
+    }
+    .rest{border:1px dashed var(--border);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;min-height:160px}
+
+    /* tabela do dia */
+    table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:auto}
+    th{font-size:12px;color:var(--muted);font-weight:600;text-align:left}
+    td{font-size:.95rem;padding:6px 8px;vertical-align:middle;background:#11161f;border-radius:8px}
+    td:first-child{width:45%;word-break:break-word;hyphens:auto;line-height:1.2}
+    .sets-input,.reps-input,.carga-input{
+      width:3.8ch;text-align:center;font-weight:700;font-size:.95rem;border-radius:8px;border:1px solid #2a3140;background:#0c1119;color:var(--text);padding:6px 4px
+    }
+
     /* gráficos */
     .charts{margin-top:18px}
     .chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}
     .chart-title{font-size:13px;color:var(--muted);margin:0 0 8px}
     .chart-wrap{height:420px}
-    @media (max-width:980px){ .day{grid-column:span 12;min-width:auto} }
 
-    /* Botões Exportar e Importar JSON */
-    button{
-      background-color: var(--accent);
-      border: none; color: white;
-      padding: 8px 14px; font-size: 14px;
-      border-radius: 8px; cursor: pointer;
-      margin-left: 6px; transition: background-color .3s;
-    }
-    button:hover{ background-color: var(--accent2); }
-    select{
-      padding: 6px; border-radius: 6px; border: 1px solid var(--border);
-      background-color: var(--card); color: var(--text); margin-left: 4px;
-    }
-
-    /* Total da sessão + barra */
+    /* total da sessão */
     .totals{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:8px}
-    .bar{height:8px;background:#0d1117;border:1px solid var(--border);border-radius:999px;overflow:hidden;margin-top:6px}
-    .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}
-    
-    /* Ajustes para a nova tabela */
-    .workout-day-card table colgroup {
-        display: none; /* remove o colgroup antigo */
-    }
-    .workout-day-card table {
-        table-layout: auto;
-    }
-    .workout-day-card th:first-child, .workout-day-card td:first-child {
-        width: 45%; /* Aumenta a largura da coluna de exercício */
-        white-space: normal; /* Permite a quebra de linha */
-    }
-    .workout-day-card td {
-        min-height: 48px;
-    }
-    .workout-day-card td:not(:first-child) {
-        text-align: center;
-        width: 15%;
-    }
-    .workout-day-card th:not(:first-child) {
-        text-align: center;
-        width: 15%;
-    }
-    .editable-input {
-        background: transparent;
-        border: none;
-        color: var(--text);
-        padding: 0;
-        text-align: center;
-    }
-    
-    /* Estilos do novo gráfico de média de repetições */
-    #custom-avg-chart {
-        padding: 10px;
-    }
-    .avg-rep-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 5px;
-        font-size: 12px;
-    }
-    .avg-rep-item .label {
-        width: 40%;
-        text-align: right;
-        padding-right: 10px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .avg-rep-item .bar-container {
-        flex-grow: 1;
-        background: var(--bg);
-        border-radius: 4px;
-        height: 12px;
-        overflow: hidden;
-    }
-    .avg-rep-item .bar {
-        height: 100%;
-        background: linear-gradient(90deg, var(--accent), var(--accent2));
-        transition: width 0.5s ease-in-out;
+
+    /* esconder blocos vazios */
+    .card:empty,[data-empty="true"]{display:none !important}
+
+    @media (min-width:992px){
+      .days{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); overflow:visible}
+      .day-card{flex:1 1 auto; max-width:unset}
     }
   </style>
 </head>
@@ -207,14 +86,14 @@
     <div>
       <h1>Periodização Ondulatória — 12 semanas</h1>
       <div class="sub">Workspace: <code id="ws-label"></code></div>
-      <div class="src-badge" id="src-badge"></div>
+      <div class="small" id="src-badge"></div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="controls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <label>Semana:
-        <select id="week" class="btn"></select>
+        <select id="week"></select>
       </label>
-      <button id="exportBtn" class="btn">Exportar JSON</button>
-      <button id="importBtn" class="btn">Importar JSON</button>
+      <button id="exportBtn">Exportar JSON</button>
+      <button id="importBtn">Importar JSON</button>
       <input type="file" id="fileInput" accept="application/json" style="display:none"/>
     </div>
   </header>
@@ -222,8 +101,7 @@
   <div class="wrap">
     <div class="rowlabel">Faixa alvo de repetições da semana: <b id="repRange">—</b></div>
 
-    <div class="row" id="workouts-row">
-      </div>
+    <div id="workouts-row" class="days"></div>
 
     <section class="charts">
       <h2 style="font-size:16px;margin:18px 0 8px">📈 Evolução do seu treino</h2>
@@ -241,12 +119,11 @@
     </section>
     
     <section class="charts">
-        <h2 style="font-size:16px;margin:18px 0 8px">💪 Exercícios da semana</h2>
-        <div class="chart-card" id="all-exercises-list">
-            </div>
+      <h2 style="font-size:16px;margin:18px 0 8px">💪 Exercícios da semana</h2>
+      <div class="chart-card" id="all-exercises-list"></div>
     </section>
 
-    <p class="hint" id="testStatus"></p>
+    <p class="small" id="testStatus"></p>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -255,9 +132,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import {
-      getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot,
-      getDocFromServer, getDocFromCache, enableIndexedDbPersistence,
-      collectionGroup, query, getDocs
+      getFirestore, collection, doc, getDoc, setDoc,
+      enableIndexedDbPersistence, query, getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     // === Firebase config (o seu) ===
@@ -270,11 +146,11 @@
       appId: "1:152908725685:web:ca42dc3714fe07af162dfc"
     };
 
-    // Workspace pela URL (?ws=nome) — agora é o ID do usuário
+    // Workspace (?ws=) — ID do usuário
     const params = new URLSearchParams(location.search);
     const rawWs = (params.get('ws') || '').trim();
-if (!rawWs) { location.href = 'index.html'; }
-const userId = rawWs;
+    if (!rawWs) { location.href = 'index.html'; }
+    const userId = rawWs;
     document.getElementById('ws-label').textContent = userId;
 
     // Firebase
@@ -283,286 +159,184 @@ const userId = rawWs;
     const db = getFirestore(app);
     enableIndexedDbPersistence(db).catch(()=>{});
 
-    // ===== Metadados do ciclo =====
+    // Ciclo de 12 semanas
     const weeks = [
       {id:1,reps:"12–15",treg:false},{id:2,reps:"4–6",treg:false},{id:3,reps:"8–10",treg:false},{id:4,reps:"12–15",treg:false},
       {id:5,reps:"12–15",treg:true},{id:6,reps:"4–6",treg:false},{id:7,reps:"8–10",treg:false},{id:8,reps:"12–15",treg:false},
       {id:9,reps:"12–15",treg:true},{id:10,reps:"4–6",treg:false},{id:11,reps:"8–10",treg:false},{id:12,reps:"12–15",treg:false}
     ];
+
     const repRangeLbl = document.getElementById('repRange');
     const weekSelect = document.getElementById('week');
-    const customAvgChart = document.getElementById('custom-avg-chart');
     const allExercisesList = document.getElementById('all-exercises-list');
     const workoutsRow = document.getElementById('workouts-row');
-    workoutsRow.classList.add('days'); // ativa as regras do carrossel responsivo
-
     const avgChartMessageDiv = document.getElementById('avgChart-message');
 
-    // Preenche o seletor de semanas
+    // Preenche o seletor de semanas + rótulo de reps
     weeks.forEach(week => {
-        const option = document.createElement('option');
-        option.value = week.id;
-        option.textContent = `Semana ${week.id}`;
-        weekSelect.appendChild(option);
-// Define semana padrão e rótulo de reps
-if (weeks && weeks.length > 0) {
-  if (!weekSelect.value) weekSelect.value = weeks[0].id;
-  if (typeof weeks[0].reps !== 'undefined') {
-    repRangeLbl.textContent = weeks[0].reps + (weeks[0].treg ? ' · TREG' : '');
-  }
-}
-
-// Define semana padrão e rótulo de reps
-if (weeks && weeks.length > 0) {
-  if (!weekSelect.value) weekSelect.value = weeks[0].id;
-  if (typeof weeks[0].reps !== 'undefined') {
-    repRangeLbl.textContent = weeks[0].reps + (weeks[0].treg ? ' · TREG' : '');
-  }
-}
-
+      const option = document.createElement('option');
+      option.value = week.id;
+      option.textContent = `Semana ${week.id}`;
+      weekSelect.appendChild(option);
     });
+    if (!weekSelect.value) weekSelect.value = weeks[0].id;
+    repRangeLbl.textContent = weeks[0].reps + (weeks[0].treg ? ' · TREG' : '');
 
-    // ===== Helpers =====
-    const $=(s,r=document)=>r.querySelector(s);
+    // Helpers
     const el=(t,a={})=>Object.assign(document.createElement(t),a);
     const formatNum=n=>(Number(n)||0).toLocaleString('pt-BR',{maximumFractionDigits:2});
     const vol=o=>Math.round((Number(o.sets)||0)*(Number(o.reps)||0)*(Number(o.carga)||0)*100)/100;
-
-    function dayDocRef(ws, weekId, dayIdx){
-      return doc(db, "workspaces", ws, "weeks", String(weekId), "days", String(dayIdx));
-    }
-
-    // === Total da sessão + barra (helpers) ===
-    function sessionSum(arr){
-      return arr.reduce((a,o)=>a + Math.round((Number(o.sets)||0)*(Number(o.reps)||0)*(Number(o.carga)||0)*100)/100, 0);
-    }
-    
-    // Adiciona o rodapé de total da sessão
+    function sessionSum(arr){ return arr.reduce((a,o)=>a+vol(o),0); }
     function attachSessionFooter(container, data){
-      const sum = sessionSum(data);
       const totalsWrap = el('div',{className:'totals'});
-      const totalLbl = el('div',{textContent:`Total da sessão: ${formatNum(sum)}`});
-      totalsWrap.append(totalLbl);
+      totalsWrap.append(el('div',{textContent:`Total da sessão: ${formatNum(sessionSum(data))}`}));
       container.append(totalsWrap);
     }
 
-    // ===== Busca e exibe o treino do usuário =====
-    async function loadUserSchedule() {
-        const selectedWeek = weekSelect.value;
-        const currentWeekData = weeks.find(w => w.id == selectedWeek);
-        
-        if (currentWeekData) {
-            let label = currentWeekData.reps;
-            if (currentWeekData.treg) {
-                label += ' · TREG';
-            }
-            repRangeLbl.textContent = label;
-        } else {
-            repRangeLbl.textContent = "—";
-        }
-        
-        const userRef = doc(db, 'users', userId);
-        const userSnap = await getDoc(userRef);
-
-        if (userSnap.exists() && userSnap.data().workoutSchedule) {
-            const schedule = userSnap.data().workoutSchedule;
-            
-            const workoutIds = Object.values(schedule);
-            const uniqueWorkoutIds = [...new Set(workoutIds)];
-            
-            const workoutsCollectionRef = collection(db, 'users', userId, 'workouts');
-            const workoutsWeekCollectionRef = collection(db, `users/${userId}/weeks/${selectedWeek}/workouts`);
-            
-            const baseWorkoutPromises = uniqueWorkoutIds.map(id => getDoc(doc(workoutsCollectionRef, id)));
-            const weekWorkoutPromises = uniqueWorkoutIds.map(id => getDoc(doc(workoutsWeekCollectionRef, id)));
-            
-            const [baseWorkoutSnaps, weekWorkoutSnaps] = await Promise.all([
-                Promise.all(baseWorkoutPromises),
-                Promise.all(weekWorkoutPromises)
-            ]);
-
-            const workoutsMap = {};
-            baseWorkoutSnaps.forEach(snap => {
-                if (snap.exists()) {
-                    workoutsMap[snap.id] = { ...(workoutsMap[snap.id] || {}), ...snap.data() };
-                }
-            });
-            weekWorkoutSnaps.forEach(snap => {
-                if (snap.exists()) {
-                    workoutsMap[snap.id] = { ...(workoutsMap[snap.id] || {}), ...snap.data() };
-                }
-            });
-
-            workoutsRow.innerHTML = '';
-            
-            const daysOfWeek = ['Dia 1', 'Dia 2', 'Dia 3', 'Dia 4', 'Dia 5', 'Dia 6', 'Dia 7'];
-            
-            const allExercisesForWeek = new Set();
-            
-            for (const day of daysOfWeek) {
-                const workoutId = schedule[day];
-                if (workoutId && workoutsMap[workoutId]) {
-                    const workoutData = workoutsMap[workoutId];
-                    const card = document.createElement('section');
-                    card.className = 'day card workout-day-card day-card'; // <-- adicionei day-card
-
-                    workoutsRow.appendChild(dayCard);
-                    
-                    workoutData.exercises.forEach(ex => {
-                        allExercisesForWeek.add(ex.nome);
-                    });
-                } else {
-                    const restCard = document.createElement('section');
-                    restCard.className = 'day card rest';
-                    restCard.innerHTML = `DESCANSO`;
-                    restCard.style.gridColumn = 'span 4';
-                    workoutsRow.appendChild(restCard);
-                }
-            }
-
-            const sortedExercises = Array.from(allExercisesForWeek).sort();
-            displayAllWeeklyExercises(sortedExercises);
-
-            await updateCharts();
-        } else {
-            workoutsRow.innerHTML = `
-                <div class="empty">
-                    <p>Nenhum treino programado para este usuário.</p>
-                    <button id="create-workout-btn">Criar Novo Treino</button>
-                </div>
-            `;
-            const createWorkoutBtn = document.getElementById('create-workout-btn');
-            if (createWorkoutBtn) {
-                createWorkoutBtn.addEventListener('click', () => {
-                    window.location.href = `workout_builder.html?ws=${userId}`;
-                });
-            }
-            allExercisesList.innerHTML = '';
-            await updateCharts();
-        }
-    }
-
-    function displayAllWeeklyExercises(exercises) {
-        allExercisesList.innerHTML = '';
-        if (exercises.length > 0) {
-            const ul = document.createElement('ul');
-            ul.style.listStyle = 'none';
-            ul.style.padding = '0';
-            ul.style.margin = '0';
-            ul.style.columnCount = '2';
-            ul.style.gap = '10px';
-            exercises.forEach(ex => {
-                const li = document.createElement('li');
-                const name = ex.split(' - ')[1] || ex;
-                li.textContent = name;
-                ul.appendChild(li);
-            });
-            allExercisesList.appendChild(ul);
-        } else {
-            allExercisesList.innerHTML = '<p style="margin:0;color:var(--muted)">Nenhum exercício encontrado para esta semana.</p>';
-        }
-    }
-
+    // Monta um card de dia
     function createWorkoutDayCard(dayName, workout, workoutId) {
-        const card = document.createElement('section');
-        card.className = 'day card workout-day-card';
-        card.style.gridColumn = 'span 4';
-        card.dataset.workoutId = workoutId;
+      const card = document.createElement('section');
+      card.className = 'day-card card workout-day-card';
+      card.dataset.workoutId = workoutId;
 
-        const title = document.createElement('div');
-        title.className = 'title';
-        title.innerHTML = `
-            <h3>${dayName} · ${(workout.name ?? workout.nome) || 'Treino sem nome'}</h3>
-            <button class="edit-btn">Editar</button>
-        `;
-        card.appendChild(title);
+      const title = el('div',{className:'title'});
+      title.innerHTML = `<h3>${dayName} · ${(workout.name ?? workout.nome) || 'Treino sem nome'}</h3>
+                         <button class="edit-btn">Editar</button>`;
+      card.appendChild(title);
 
-        const table = document.createElement('table');
-        table.innerHTML = `
-            <thead>
-                <tr>
-                    <th>Exercício</th>
-                    <th>Séries</th>
-                    <th>Reps</th>
-                    <th>Carga (kg)</th>
-                    <th>Volume</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        `;
+      const table = el('table');
+      table.innerHTML = `
+        <thead>
+          <tr><th>Exercício</th><th>Séries</th><th>Reps</th><th>Carga (kg)</th><th>Volume</th></tr>
+        </thead>
+        <tbody></tbody>`;
+      const tbody = table.querySelector('tbody');
 
-        const tbody = table.querySelector('tbody');
-        workout.exercises.forEach((ex, index) => {
-            const tr = document.createElement('tr');
-            const exerciseName = ex.nome.split(' - ')[1] || ex.nome;
-            tr.innerHTML = `
-                <td>${exerciseName}</td>
-                <td>
-                    <input type="number" class="sets-input editable-input" value="${ex.sets}" disabled>
-                </td>
-                <td>
-                    <input type="number" class="reps-input editable-input" value="${ex.reps}" disabled>
-                </td>
-                <td>
-                    <input type="number" class="carga-input editable-input" value="${ex.carga}" disabled>
-                </td>
-                <td><span class="volume-span">${vol(ex)}</span></td>
-            `;
-            tbody.appendChild(tr);
+      (workout.exercises||[]).forEach(ex => {
+        const tr = document.createElement('tr');
+        const name = (ex.nome||'').split(' - ')[1] || ex.nome || '';
+        tr.innerHTML = `
+          <td>${name}</td>
+          <td><input type="number" class="sets-input"  value="${ex.sets??0}"  disabled></td>
+          <td><input type="number" class="reps-input"  value="${ex.reps??0}"  disabled></td>
+          <td><input type="number" class="carga-input" value="${ex.carga??0}" disabled></td>
+          <td><span class="volume-span">${vol(ex)}</span></td>`;
+        tbody.appendChild(tr);
+      });
+      card.appendChild(table);
+
+      attachSessionFooter(card, workout.exercises||[]);
+
+      const editBtn = card.querySelector('.edit-btn');
+      editBtn.addEventListener('click', () => {
+        const inputs = card.querySelectorAll('.sets-input,.reps-input,.carga-input');
+        const editing = editBtn.textContent === 'Editar';
+        editBtn.textContent = editing ? 'Salvar' : 'Editar';
+        inputs.forEach(i => {
+          if (editing){ i.removeAttribute('disabled'); i.style.border='1px solid var(--border)'; }
+          else        { i.setAttribute('disabled', true); i.style.border='none'; }
         });
-        card.appendChild(table);
+        if (!editing) saveWorkoutChanges(card, workoutId);
+      });
 
-        attachSessionFooter(card, workout.exercises);
-        
-        const editBtn = card.querySelector('.edit-btn');
-        editBtn.addEventListener('click', () => {
-            if (editBtn.textContent === "Editar") {
-                editBtn.textContent = "Salvar";
-                card.querySelectorAll('.editable-input').forEach(input => {
-                    input.removeAttribute('disabled');
-                    input.style.border = '1px solid var(--border)';
-                });
-            } else {
-                editBtn.textContent = "Editar";
-                card.querySelectorAll('.editable-input').forEach(input => {
-                    input.setAttribute('disabled', true);
-                    input.style.border = 'none';
-                });
-                saveWorkoutChanges(card, workoutId);
-            }
-        });
-        
-        return card;
+      return card;
     }
 
     async function saveWorkoutChanges(card, workoutId) {
-        const selectedWeek = weekSelect.value;
-        const exercises = [];
-        const exerciseRows = card.querySelectorAll('tbody tr');
-        
-        exerciseRows.forEach(row => {
-            const name = row.querySelector('td:first-child').textContent;
-            const sets = parseFloat(row.querySelector('.sets-input').value);
-            const reps = parseFloat(row.querySelector('.reps-input').value);
-            const carga = parseFloat(row.querySelector('.carga-input').value);
-            
-            exercises.push({ nome: name, sets, reps, carga });
-        });
-        
-        const workoutRef = doc(db, `users/${userId}/weeks/${selectedWeek}/workouts`, workoutId);
-        const title = card.querySelector('h3')?.textContent || '';
-const nameFromTitle = title.includes('·') ? title.split('·')[1].trim() : title.trim();
+      const selectedWeek = weekSelect.value;
+      const exercises = [];
+      card.querySelectorAll('tbody tr').forEach(row => {
+        const name  = row.querySelector('td:first-child').textContent.trim();
+        const sets  = parseFloat(row.querySelector('.sets-input').value)  || 0;
+        const reps  = parseFloat(row.querySelector('.reps-input').value)  || 0;
+        const carga = parseFloat(row.querySelector('.carga-input').value) || 0;
+        exercises.push({ nome: name, sets, reps, carga });
+      });
+      const title = card.querySelector('h3')?.textContent || '';
+      const nameFromTitle = title.includes('·') ? title.split('·')[1].trim() : title.trim();
 
-await setDoc(workoutRef, { name: nameFromTitle, exercises }, { merge: true });
-        alert("Alterações salvas com sucesso!");
-        await loadUserSchedule();
+      const workoutRef = doc(db, `users/${userId}/weeks/${selectedWeek}/workouts`, workoutId);
+      await setDoc(workoutRef, { name: nameFromTitle, exercises }, { merge: true });
+      alert("Alterações salvas com sucesso!");
+      await loadUserSchedule();
+    }
+
+    // Carrega o cronograma do usuário
+    async function loadUserSchedule() {
+      const selectedWeek = weekSelect.value;
+      const weekMeta = weeks.find(w => w.id == selectedWeek);
+      repRangeLbl.textContent = weekMeta ? weekMeta.reps + (weekMeta.treg ? ' · TREG' : '') : '—';
+
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      workoutsRow.innerHTML = '';
+
+      if (userSnap.exists() && userSnap.data().workoutSchedule) {
+        const schedule = userSnap.data().workoutSchedule;
+        const workoutIds = Object.values(schedule);
+        const uniqueIds = [...new Set(workoutIds)];
+
+        const baseSnaps = await Promise.all(uniqueIds.map(id => getDoc(doc(db, `users/${userId}/workouts/${id}`))));
+        const weekSnaps = await Promise.all(uniqueIds.map(id => getDoc(doc(db, `users/${userId}/weeks/${selectedWeek}/workouts/${id}`))));
+
+        const map = {};
+        baseSnaps.forEach(s => { if (s.exists()) map[s.id] = {...(map[s.id]||{}), ...s.data()}; });
+        weekSnaps.forEach(s => { if (s.exists()) map[s.id] = {...(map[s.id]||{}), ...s.data()}; });
+
+        const days = ['Dia 1','Dia 2','Dia 3','Dia 4','Dia 5','Dia 6','Dia 7'];
+        const allExercises = new Set();
+
+        for (const day of days){
+          const wid = schedule[day];
+          if (wid && map[wid]){
+            const card = createWorkoutDayCard(day, map[wid], wid);
+            workoutsRow.appendChild(card);
+            (map[wid].exercises||[]).forEach(ex => allExercises.add(ex.nome));
+          } else {
+            const rest = document.createElement('section');
+            rest.className = 'day-card card rest';
+            rest.textContent = 'DESCANSO';
+            workoutsRow.appendChild(rest);
+          }
+        }
+
+        const sorted = Array.from(allExercises).sort();
+        displayAllWeeklyExercises(sorted);
+        await updateCharts();
+      } else {
+        workoutsRow.innerHTML = `
+          <div class="card">
+            <p class="empty">Nenhum treino programado para este usuário.</p>
+            <div style="text-align:right"><a href="workout_builder.html?ws=${userId}"><button>Criar Novo Treino</button></a></div>
+          </div>`;
+        allExercisesList.innerHTML = '';
+        await updateCharts();
+      }
+    }
+
+    function displayAllWeeklyExercises(exercises) {
+      allExercisesList.innerHTML = '';
+      if (exercises.length > 0) {
+        const ul = document.createElement('ul');
+        ul.style.listStyle = 'none';
+        ul.style.padding = '0';
+        ul.style.margin = '0';
+        ul.style.columnCount = '2';
+        ul.style.gap = '10px';
+        exercises.forEach(ex => {
+          const li = document.createElement('li');
+          const name = ex.split(' - ')[1] || ex;
+          li.textContent = name;
+          ul.appendChild(li);
+        });
+        allExercisesList.appendChild(ul);
+      } else {
+        allExercisesList.innerHTML = '<p style="margin:0;color:var(--muted)">Nenhum exercício encontrado para esta semana.</p>';
+      }
     }
 
     // ===== Gráficos =====
     let weeklyChart=null;
-    // (removido duplicado) 
-    const avgChartWrap = document.getElementById('avgChartWrap');
-
     async function buildChartsIfNeeded(){
       const weeklyVolumes = await getAllWeeksVolumes();
       if(!weeklyChart){
@@ -574,93 +348,58 @@ await setDoc(workoutRef, { name: nameFromTitle, exercises }, { merge: true });
         });
       }
     }
-    
     async function updateCharts(){
       const selectedWeek = weekSelect.value;
       const weeklyVolumes = await getAllWeeksVolumes();
-      const avgRepsRows = await getWeekExerciseAvgRepsRows(selectedWeek);
+      const avgRows = await getWeekExerciseAvgRepsRows(selectedWeek);
 
-      if(weeklyChart) {
-          weeklyChart.data.datasets[0].data = weeklyVolumes;
-          weeklyChart.update();
-      }
-      
-      if(avgRepsRows.length > 0) {
+      if(weeklyChart){ weeklyChart.data.datasets[0].data = weeklyVolumes; weeklyChart.update(); }
+
+      if(avgRows.length > 0) {
         avgChartMessageDiv.style.display = 'none';
-        
-        const customAvgChart = document.getElementById('custom-avg-chart');
-        customAvgChart.innerHTML = '';
-        const maxReps = Math.max(...avgRepsRows.map(r => r.avgReps));
-        
-        avgRepsRows.forEach(row => {
-            const barWidth = (row.avgReps / maxReps) * 100;
-            const item = el('div', { className: 'avg-rep-item' });
-            const label = el('span', { className: 'label', textContent: row.nome });
-            const barContainer = el('div', { className: 'bar-container' });
-            const bar = el('div', { className: 'bar' });
-            bar.style.width = `${barWidth}%`;
-
-            barContainer.appendChild(bar);
-            item.appendChild(label);
-            item.appendChild(barContainer);
-            customAvgChart.appendChild(item);
+        const container = document.getElementById('custom-avg-chart');
+        container.innerHTML = '';
+        const maxReps = Math.max(...avgRows.map(r => r.avgReps));
+        avgRows.forEach(row => {
+          const item = el('div', { className: 'avg-rep-item', style:'display:flex;align-items:center;margin-bottom:6px;font-size:12px' });
+          const label = el('span', { style:'width:40%;text-align:right;padding-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis', textContent: row.nome });
+          const barC = el('div', { style:'flex:1;background:var(--bg);border-radius:4px;height:12px;overflow:hidden' });
+          const bar = el('div', { style:`height:100%;background:linear-gradient(90deg, var(--accent), var(--accent2));width:${(row.avgReps/maxReps)*100}%` });
+          barC.appendChild(bar); item.appendChild(label); item.appendChild(barC); container.appendChild(item);
         });
-
       } else {
         avgChartMessageDiv.style.display = 'block';
         document.getElementById('custom-avg-chart').innerHTML = '';
       }
     }
-
     async function getWeekVolume(weekId){
-        const workoutRef = collection(db, `users/${userId}/weeks/${weekId}/workouts`);
-        const workoutSnap = await getDocs(query(workoutRef));
-        
-        let totalVolume = 0;
-        workoutSnap.forEach(doc => {
-            const workoutData = doc.data();
-            workoutData.exercises.forEach(ex => {
-                totalVolume += vol(ex);
-            });
-        });
-        return totalVolume;
+      const snap = await getDocs(query(collection(db, `users/${userId}/weeks/${weekId}/workouts`)));
+      let total = 0;
+      snap.forEach(d => (d.data().exercises||[]).forEach(ex => total += vol(ex)));
+      return total;
     }
-    
-    async function getAllWeeksVolumes(){
-        const volumes = [];
-        const promises = weeks.map(week => getWeekVolume(week.id));
-        const allVolumes = await Promise.all(promises);
-        return allVolumes;
-    }
-
+    async function getAllWeeksVolumes(){ return Promise.all(weeks.map(w => getWeekVolume(w.id))); }
     async function getWeekExerciseAvgRepsRows(weekId){
-        const map = new Map();
-        const workoutRef = collection(db, `users/${userId}/weeks/${weekId}/workouts`);
-        const workoutSnap = await getDocs(query(workoutRef));
-        
-        workoutSnap.forEach(doc => {
-            const workoutData = doc.data();
-            workoutData.exercises.forEach(o => {
-                const name=o.nome.split(' - ')[1] || o.nome;
-                const entry=map.get(name)||{sumReps:0,count:0,sumVol:0};
-                entry.sumReps += Number(o.reps)||0;
-                entry.count   += 1;
-                entry.sumVol  += vol(o);
-                map.set(name,entry);
-            });
+      const map = new Map();
+      const snap = await getDocs(query(collection(db, `users/${userId}/weeks/${weekId}/workouts`)));
+      snap.forEach(doc => {
+        (doc.data().exercises||[]).forEach(o => {
+          const name=(o.nome||'').split(' - ')[1] || o.nome || '';
+          const entry=map.get(name)||{sumReps:0,count:0,sumVol:0};
+          entry.sumReps += Number(o.reps)||0;
+          entry.count   += 1;
+          entry.sumVol  += vol(o);
+          map.set(name,entry);
         });
-
-        const rows=[...map.entries()].map(([nome,{sumReps,count,sumVol}])=>({ nome, avgReps: count? (sumReps/count):0, sumVol }));
-        rows.sort((a,b)=>b.sumVol-a.sumVol-b.count+a.count);
-        return rows;
+      });
+      const rows=[...map.entries()].map(([nome,{sumReps,count,sumVol}])=>({ nome, avgReps: count? (sumReps/count):0, sumVol }));
+      rows.sort((a,b)=>b.sumVol-a.sumVol-b.count+a.count);
+      return rows;
     }
-    
-    // Event listener para quando a semana for alterada
-    weekSelect.addEventListener('change', async () => {
-        await loadUserSchedule();
-    });
 
-    // ===== Init =====
+    weekSelect.addEventListener('change', loadUserSchedule);
+
+    // Init
     (async function init(){
       signInAnonymously(auth).catch(console.error);
       document.getElementById('testStatus').textContent = 'Autotestes: 1/1 OK';
@@ -670,22 +409,12 @@ await setDoc(workoutRef, { name: nameFromTitle, exercises }, { merge: true });
     })();
   </script>
 
+  <!-- SW (uma vez só) -->
   <script>
-(function () {
-    if (!('serviceWorker' in navigator)) return;
-    navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
-  })();
-
-
-(function () {
-    if (!('serviceWorker' in navigator)) return;
-    // Pages roda em HTTPS, então ok registrar:
-    navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
-  })();
-
-
-    
+    (function () {
+      if (!('serviceWorker' in navigator)) return;
+      navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
+    })();
   </script>
-  
 </body>
 </html>
