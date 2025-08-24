@@ -1,6 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+
+
+<style>
+  /* Base legível no mobile */
+  :root{
+    --bg:#0f1115; --card:#171c25; --muted:#9aa3b2; --accent:#6ee7ff;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg); color:#e8ecf1; padding-bottom:env(safe-area-inset-bottom, 16px);}
+
+  /* Títulos e textos com clamp: ajusta automático por viewport */
+  h1{font-size:clamp(1.15rem, 3.5vw, 1.6rem); line-height:1.2; margin:12px 12px 8px;}
+  h3{font-size:clamp(1rem, 3vw, 1.2rem); margin:0 0 8px 0;}
+
+  /* Header fixo (sem sumir) e compacto em telas pequenas */
+  .header, header{
+    position:sticky; top:0; z-index:10;
+    background:linear-gradient(180deg, rgba(15,17,21,.98), rgba(15,17,21,.86));
+    backdrop-filter:saturate(140%) blur(6px);
+    padding:8px 12px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .header .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  select, button{font:600 14px/1 system-ui; border:0; border-radius:10px; padding:10px 12px}
+  button{background:var(--accent); color:#07202a}
+  @media (max-width:360px){
+    .header .row > *{flex:1 1 auto} /* botões ocupam a largura */
+    button, select{width:100%}
+  }
+
+  /* LISTA DE DIAS: carrossel horizontal com snap */
+  .days{display:flex; gap:12px; padding:12px; overflow-x:auto; scroll-snap-type:x mandatory}
+  .days::-webkit-scrollbar{height:6px}
+  .days::-webkit-scrollbar-thumb{background:#2a3140; border-radius:999px}
+
+  .day-card{
+    flex:0 0 85vw;               /* ocupa ~85% da tela */
+    max-width:360px;             /* e não passa disso em telas maiores */
+    scroll-snap-align:start;
+    background:var(--card);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:16px;
+    padding:12px;
+    box-shadow:0 6px 22px rgba(0,0,0,.25);
+  }
+
+  /* Tabela mais compacta e legível */
+  .day-card table{width:100%; border-collapse:separate; border-spacing:0 8px}
+  .day-card th{font-size:.8rem; color:var(--muted); font-weight:600; text-align:left}
+  .day-card td{font-size:.95rem; padding:6px 8px; vertical-align:middle; background:#11161f; border-radius:8px}
+  .day-card td:first-child{
+    word-break:break-word; hyphens:auto; line-height:1.2;
+  }
+  .sets-input,.reps-input,.carga-input{
+    width:3.8ch; text-align:center; font-weight:700; font-size:.95rem;
+    border-radius:8px; border:1px solid #2a3140; background:#0c1119; color:#e8ecf1; padding:6px 4px;
+  }
+
+  /* Cards vazios: some com a “telinha branca” */
+  .card:empty,[data-empty="true"]{display:none !important}
+
+  /* Em telas maiores, vira grade bonitinha */
+  @media (min-width:992px){
+    .days{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); overflow:visible}
+    .day-card{flex:1 1 auto; max-width:unset}
+  }
+</style>
+
+
+
+  
   <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f1115">
 
