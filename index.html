@@ -1,119 +1,150 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+  <meta charset="utf-8" />
+  <!-- iOS PWA metas -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Wave Training">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Wave Training">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Manifest / tema -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f1115">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f1115">
+  <title>Selecione um Usuário</title>
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Selecione um Usuário</title>
-    <style>
-        :root { --bg: #0f1115; --panel: #151923; --text: #e8ecf1; --accent: #6ee7ff; --card: #1b2230; --border: #273043; }
-        body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, Segoe UI, Roboto, Helvetica, Arial; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
-        .container { max-width: 600px; padding: 20px; text-align: center; }
-        h1 { font-size: 2em; color: var(--text); }
-        .user-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .user-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; text-align: left; cursor: pointer; transition: background-color 0.2s; }
-        .user-card:hover { background-color: #2a374c; }
-        .add-user-form { display: flex; gap: 10px; margin-top: 20px; width: 100%; }
-        .add-user-form input { flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--card); color: var(--text); }
-        .add-user-form button { padding: 10px 15px; border-radius: 8px; border: none; background-color: var(--accent); color: var(--card); font-weight: bold; cursor: pointer; }
-    </style>
+  <style>
+    :root{
+      --bg:#0f1115; --panel:#151923; --text:#e8ecf1; --muted:#9aa3b2;
+      --accent:#6ee7ff; --card:#1b2230; --border:#273043;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0; background:var(--bg); color:var(--text); font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+    .app-root{min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 16px)}
+    .container{width:min(640px, 100%); background:transparent}
+    h1{margin:0 0 12px; font-size:clamp(1.3rem, 4.5vw, 2rem)}
+    .user-list{display:flex; flex-direction:column; gap:10px; margin-top:16px}
+    .user-card{
+      background:var(--card); border:1px solid var(--border); border-radius:12px;
+      padding:14px; cursor:pointer; transition:transform .06s ease, background-color .2s;
+      touch-action:manipulation;
+    }
+    .user-card:active{transform:scale(.99)}
+    .user-card:hover{background-color:#2a374c}
+    .add-user-form{display:flex; gap:10px; margin-top:18px; width:100%}
+    .add-user-form input{
+      flex:1; padding:12px; border-radius:10px; border:1px solid var(--border);
+      background:var(--card); color:var(--text);
+    }
+    .add-user-form button{
+      padding:12px 16px; border-radius:10px; border:none; font-weight:700; cursor:pointer;
+      background:var(--accent); color:#062029;
+    }
+    .empty{color:var(--muted)}
+  </style>
 </head>
 <body>
+  <div class="app-root">
     <div class="container">
-        <h1>Selecione um Usuário</h1>
-        <div class="user-list" id="user-list">
-            </div>
-        <div class="add-user-form">
-            <input type="text" id="new-user-name" placeholder="Digite o nome do novo usuário">
-            <button id="add-user-btn">Adicionar</button>
-        </div>
+      <h1>Selecione um Usuário</h1>
+
+      <div class="user-list" id="user-list"></div>
+
+      <form class="add-user-form" id="add-user-form">
+        <input type="text" id="new-user-name" placeholder="Digite o nome do novo usuário" autocomplete="name" />
+        <button type="submit">Adicionar</button>
+      </form>
     </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-        import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-        // === Sua config do Firebase ===
-        const firebaseConfig = {
-          apiKey: "AIzaSyAN9B0dCAIfVPmGZ6qUUfC8k9KnrUT5ymI",
-          authDomain: "treino-ondulatoriov5.firebaseapp.com",
-          projectId: "treino-ondulatoriov5",
-          storageBucket: "treino-ondulatoriov5.firebasestorage.app",
-          messagingSenderId: "152908725685",
-          appId: "1:152908725685:web:ca42dc3714fe07af162dfc"
-        };
-        
-        // Inicializa o Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        signInAnonymously(auth);
+    // Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAN9B0dCAIfVPmGZ6qUUfC8k9KnrUT5ymI",
+      authDomain: "treino-ondulatoriov5.firebaseapp.com",
+      projectId: "treino-ondulatoriov5",
+      storageBucket: "treino-ondulatoriov5.firebasestorage.app",
+      messagingSenderId: "152908725685",
+      appId: "1:152908725685:web:ca42dc3714fe07af162dfc"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    signInAnonymously(auth).catch(console.warn);
 
-        const userListContainer = document.getElementById('user-list');
-        const addUserBtn = document.getElementById('add-user-btn');
-        const userNameInput = document.getElementById('new-user-name');
+    const userListContainer = document.getElementById('user-list');
+    const form = document.getElementById('add-user-form');
+    const userNameInput = document.getElementById('new-user-name');
 
-        async function loadUsers() {
-            userListContainer.innerHTML = '';
-            const q = query(collection(db, 'users'));
-            const querySnapshot = await getDocs(q);
-            if (querySnapshot.empty) {
-                const noUsersMsg = document.createElement('div');
-                noUsersMsg.textContent = 'Nenhum usuário encontrado. Adicione um novo!';
-                noUsersMsg.style.color = 'var(--muted)';
-                userListContainer.appendChild(noUsersMsg);
-                return;
-            }
-            querySnapshot.forEach((doc) => {
-                const userData = doc.data();
-                const userCard = document.createElement('div');
-                userCard.className = 'user-card';
-                userCard.textContent = userData.name;
-                userCard.dataset.userId = doc.id;
-                userCard.addEventListener('click', () => checkAndRedirect(doc.id, userData.name));
-                userListContainer.appendChild(userCard);
-            });
-        }
-        async function addUser(userName) {
-            if (userName.trim()) {
-                const newUserRef = await addDoc(collection(db, 'users'), { name: userName, createdAt: new Date() });
-                document.getElementById('new-user-name').value = '';
-                loadUsers();
-            }
-        }
-        async function checkAndRedirect(userId) {
-            const userRef = doc(db, 'users', userId);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists() && userSnap.data().trainingDays) {
-                window.location.href = `treino.html?ws=${userId}`;
-            } else {
-                window.location.href = `choose_days.html?ws=${userId}`;
-            }
-        }
-        addUserBtn.addEventListener('click', () => addUser(userNameInput.value));
-        loadUsers();
+    async function loadUsers() {
+      userListContainer.innerHTML = '';
+      const qUsers = query(collection(db, 'users'));
+      const snap = await getDocs(qUsers);
 
+      if (snap.empty) {
+        const noUsers = document.createElement('div');
+        noUsers.className = 'empty';
+        noUsers.textContent = 'Nenhum usuário encontrado. Adicione um novo!';
+        userListContainer.appendChild(noUsers);
+        return;
+      }
 
-(function () {
-    if (!('serviceWorker' in navigator)) return;
-    // Pages roda em HTTPS, então ok registrar:
-    navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
-  })();
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        const card = document.createElement('div');
+        card.className = 'user-card';
+        card.textContent = data.name || 'Usuário sem nome';
+        card.dataset.userId = docSnap.id;
+        card.addEventListener('click', () => checkAndRedirect(docSnap.id));
+        userListContainer.appendChild(card);
+      });
+    }
 
-        
-    </script>
+    async function addUser(userName) {
+      const name = (userName || '').trim();
+      if (!name) return;
+
+      await addDoc(collection(db, 'users'), {
+        name,
+        createdAt: new Date()
+      });
+
+      userNameInput.value = '';
+      await loadUsers();
+    }
+
+    async function checkAndRedirect(userId) {
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists() && userSnap.data().trainingDays) {
+        // vai direto pro treino
+        window.location.href = `treino.html?ws=${userId}`;
+      } else {
+        // configurar dias primeiro
+        window.location.href = `choose_days.html?ws=${userId}`;
+      }
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      addUser(userNameInput.value);
+    });
+
+    loadUsers();
+  </script>
+
+  <!-- Service Worker (uma vez só, relativo) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
+    }
+  </script>
 </body>
-
 </html>
-
-
