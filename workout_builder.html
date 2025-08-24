@@ -1,392 +1,356 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+  <meta charset="utf-8" />
 
+  <!-- iOS / PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Wave Training">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
+  <title>Montar Treino</title>
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Wave Training">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Manifest / tema -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f1115">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f1115">
+  <style>
+    :root{
+      --bg:#0f1115; --panel:#151923; --muted:#a6adbb; --text:#e8ecf1;
+      --accent:#6ee7ff; --accent2:#a78bfa; --card:#1b2230; --border:#273043; --yellow:#facc15;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0; background:var(--bg); color:var(--text); font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial}
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Montar Treino</title>
-    <style>
-        :root{ --bg:#0f1115; --panel:#151923; --muted:#a6adbb; --text:#e8ecf1; --accent:#6ee7ff; --accent2:#a78bfa; --card:#1b2230; --border:#273043; --yellow:#facc15; }
-        *{box-sizing:border-box}
-        body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial}
-        header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--panel);position:sticky;top:0;z-index:5}
-        h1{font-size:18px;margin:0}
-        .wrap{max-width:1200px;margin:0 auto;padding:18px}
-        .row{display:grid;grid-template-columns:1fr;gap:20px}
-        .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;overflow:hidden}
-        .workout-title{font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-        .workout-title input{font-size:16px;font-weight:600;background:transparent;border:none;color:var(--text);padding:0;}
-        .add-workout-btn{background:var(--accent);border:none;color:var(--card);padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:bold;}
-        .add-exercise-btn{background:var(--border);border:none;color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:12px;margin-top:10px;}
-        .delete-btn{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;}
-        table{width:100%;border-collapse:collapse;table-layout:fixed}
-        th,td{border-bottom:1px solid var(--border);padding:6px 4px;text-align:left;vertical-align:top}
-        th{font-size:12px;color:var(--muted);font-weight:600}
-        input, select, textarea{font:15px/1.3 system-ui,Segoe UI,Roboto,Helvetica,Arial; font-variant-numeric: tabular-nums; background:#0d1117;border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;width:100%;}
-        .save-all-btn, .save-schedule-btn{background:var(--accent);border:none;color:var(--card);padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:bold;margin-top:20px;}
-        .select-row td:first-child{display:flex;flex-direction:column;gap:5px;}
+    header{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:16px 20px; border-bottom:1px solid var(--border);
+      background:var(--panel); position:sticky; top:0; z-index:5
+    }
+    h1{font-size:18px; margin:0}
+    .wrap{max-width:1200px; margin:0 auto; padding:18px}
+    .row{display:grid; grid-template-columns:1fr; gap:20px}
 
-        /* Painel de atribuição de dias */
-        #day-assignment-panel {
-            margin-top: 30px;
-            padding: 20px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            display: none;
-        }
-        .assignment-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        .assignment-item:last-child { border-bottom: none; }
-        .assignment-item h4 { margin: 0; }
-        .day-selection { display: flex; gap: 5px; flex-wrap: wrap; }
-        .day-selection input[type="checkbox"] { display: none; }
-        .day-selection label {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-        .day-selection input[type="checkbox"]:checked + label {
-            background: var(--accent2);
-            border-color: var(--accent2);
-            color: var(--card);
-        }
-    </style>
+    .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; overflow:hidden}
+    .workout-title{font-size:16px; font-weight:600; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px}
+    .workout-title input{font-size:16px; font-weight:600; background:transparent; border:none; color:var(--text); padding:0; width:100%}
+
+    .add-workout-btn{background:var(--accent); border:none; color:var(--card); padding:10px 14px; border-radius:8px; cursor:pointer; font-weight:bold}
+    .add-exercise-btn{background:var(--border); border:none; color:var(--text); padding:8px 12px; border-radius:8px; cursor:pointer; font-size:12px; margin-top:10px}
+    .delete-btn{background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:16px}
+
+    table{width:100%; border-collapse:collapse; table-layout:fixed}
+    th,td{border-bottom:1px solid var(--border); padding:6px 4px; text-align:left; vertical-align:top}
+    th{font-size:12px; color:var(--muted); font-weight:600}
+    input, select{font:15px/1.3 system-ui,Segoe UI,Roboto,Helvetica,Arial; font-variant-numeric:tabular-nums; background:#0d1117; border:1px solid var(--border); color:var(--text); padding:10px; border-radius:8px; width:100%}
+
+    .save-all-btn, .save-schedule-btn{background:var(--accent); border:none; color:var(--card); padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold; margin-top:20px}
+    .select-row td:first-child{display:flex; flex-direction:column; gap:5px}
+
+    /* Painel de atribuição de dias */
+    #day-assignment-panel{
+      margin-top:30px; padding:20px; background:var(--card);
+      border:1px solid var(--border); border-radius:14px; display:none
+    }
+    .assignment-item{display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border)}
+    .assignment-item:last-child{border-bottom:none}
+    .assignment-item h4{margin:0; font-size:14px}
+    .day-selection{display:flex; gap:6px; flex-wrap:wrap}
+    .day-selection input[type="checkbox"]{display:none}
+    .day-selection label{
+      background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 12px; cursor:pointer; user-select:none
+    }
+    .day-selection input[type="checkbox"]:checked + label{
+      background:var(--accent2); border-color:var(--accent2); color:var(--card)
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div>
-            <h1>Montar Treino</h1>
-        </div>
-        <button class="save-all-btn" id="save-all-btn">Salvar Tudo</button>
-    </header>
+  <header>
+    <h1>Montar Treino</h1>
+    <button class="save-all-btn" id="save-all-btn">Salvar Tudo</button>
+  </header>
 
-    <div class="wrap">
-        <div class="row" id="workouts-container"></div>
-        <button class="add-workout-btn" id="add-workout-btn">Adicionar Novo Treino</button>
+  <div class="wrap">
+    <div class="row" id="workouts-container"></div>
+    <button class="add-workout-btn" id="add-workout-btn">Adicionar Novo Treino</button>
 
-        <div id="day-assignment-panel">
-            <h2>Atribuir Treinos aos Dias da Semana</h2>
-            <p>Selecione em quais dias você fará cada treino.</p>
-            <div id="assignment-list"></div>
-            <button class="save-schedule-btn" id="save-schedule-btn">Salvar Programação</button>
-        </div>
+    <div id="day-assignment-panel">
+      <h2 style="margin:0 0 8px; font-size:16px">Atribuir Treinos aos Dias da Semana</h2>
+      <p style="margin:0 0 12px; color:var(--muted)">Selecione em quais dias você fará cada treino.</p>
+      <div id="assignment-list"></div>
+      <button class="save-schedule-btn" id="save-schedule-btn">Salvar Programação</button>
     </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, getDoc, getDocs, setDoc, query } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-        import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, getDoc, getDocs, setDoc, query } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-        // === Config Firebase ===
-        const firebaseConfig = {
-          apiKey: "AIzaSyAN9B0dCAIfVPmGZ6qUUfC8k9KnrUT5ymI",
-          authDomain: "treino-ondulatoriov5.firebaseapp.com",
-          projectId: "treino-ondulatoriov5",
-          storageBucket: "treino-ondulatoriov5.firebasestorage.app",
-          messagingSenderId: "152908725685",
-          appId: "1:152908725685:web:ca42dc3714fe07af162dfc"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        signInAnonymously(auth);
+    // Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAN9B0dCAIfVPmGZ6qUUfC8k9KnrUT5ymI",
+      authDomain: "treino-ondulatoriov5.firebaseapp.com",
+      projectId: "treino-ondulatoriov5",
+      storageBucket: "treino-ondulatoriov5.firebasestorage.app",
+      messagingSenderId: "152908725685",
+      appId: "1:152908725685:web:ca42dc3714fe07af162dfc"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    signInAnonymously(auth).catch(console.warn);
 
-        const params = new URLSearchParams(window.location.search);
-        const userId = params.get('ws');
-        if (!userId) {
-            window.location.href = 'index.html';
+    // usuário da URL
+    const params = new URLSearchParams(location.search);
+    const userId = (params.get('ws') || '').trim();
+    if (!userId) location.href = 'index.html';
+
+    const workoutsContainer = document.getElementById('workouts-container');
+    const addWorkoutBtn = document.getElementById('add-workout-btn');
+    const saveAllBtn = document.getElementById('save-all-btn');
+    const dayAssignmentPanel = document.getElementById('day-assignment-panel');
+    const assignmentList = document.getElementById('assignment-list');
+    const saveScheduleBtn = document.getElementById('save-schedule-btn');
+
+    let exercisesByRegion = {};
+    let lastSavedWorkouts = []; // [{id, name}]
+
+    // Carrega exercícios por região (coleção 'Região' com campo 'exercicios' (map) contendo { nome })
+    async function loadExercisesByRegion(){
+      exercisesByRegion = {};
+      const qReg = query(collection(db, 'Região'));
+      const snap = await getDocs(qReg);
+      snap.forEach(docSnap => {
+        const region = docSnap.id;
+        const mapa = docSnap.data().exercicios;
+        if (mapa && typeof mapa === 'object'){
+          exercisesByRegion[region] = Object.values(mapa).map(x => x.nome).sort();
         }
+      });
+    }
 
-        const workoutsContainer = document.getElementById('workouts-container');
-        const addWorkoutBtn = document.getElementById('add-workout-btn');
-        const saveAllBtn = document.getElementById('save-all-btn');
-        const dayAssignmentPanel = document.getElementById('day-assignment-panel');
-        const assignmentList = document.getElementById('assignment-list');
-        const saveScheduleBtn = document.getElementById('save-schedule-btn');
+    function createExerciseRow(exercise = { nome:'', sets:4, reps:12, carga:0 }){
+      const tr = document.createElement('tr');
+      tr.className = 'select-row';
+      tr.innerHTML = `
+        <td>
+          <select class="region-select"></select>
+          <select class="exercise-select"></select>
+        </td>
+        <td><input type="number" class="exercise-sets" value="${exercise.sets}" min="0"></td>
+        <td><input type="number" class="exercise-reps" value="${exercise.reps}" min="0"></td>
+        <td><input type="number" class="exercise-carga" value="${exercise.carga}" min="0"></td>
+      `;
 
-        let allWorkouts = [];
-        let exercisesByRegion = {};
-        let lastSavedWorkouts = [];
+      const regionSelect = tr.querySelector('.region-select');
+      const exerciseSelect = tr.querySelector('.exercise-select');
 
-        // ====== Carrega lista de exercícios por região (coleção 'Região') ======
-        async function loadExercisesByRegion() {
-            exercisesByRegion = {};
-            const q = query(collection(db, 'Região'));
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach((docSnap) => {
-                const regionName = docSnap.id;
-                const exerciciosMap = docSnap.data().exercicios;
-                if (exerciciosMap && typeof exerciciosMap === 'object') {
-                    exercisesByRegion[regionName] = Object.values(exerciciosMap).map(ex => ex.nome).sort();
-                }
-            });
+      // popula regiões
+      regionSelect.innerHTML = `<option value="">Selecione a Região</option>`;
+      Object.keys(exercisesByRegion).sort().forEach(region => {
+        const op = document.createElement('option');
+        op.value = region; op.textContent = region;
+        regionSelect.appendChild(op);
+      });
+
+      function updateExerciseSelect(region, selected){
+        exerciseSelect.innerHTML = `<option value="">Selecione o Exercício</option>`;
+        if (region && exercisesByRegion[region]){
+          exercisesByRegion[region].forEach(name => {
+            const op = document.createElement('option');
+            op.value = name; op.textContent = name;
+            if (name === selected) op.selected = true;
+            exerciseSelect.appendChild(op);
+          });
         }
+      }
 
-        function createExerciseRow(exercise = { nome: '', sets: 15, reps: 4, carga: 50 }) {
-            const tr = document.createElement('tr');
-            tr.className = 'select-row';
-            tr.innerHTML = `
-                <td>
-                    <select class="region-select"></select>
-                    <select class="exercise-select"></select>
-                </td>
-                <td><input type="number" class="exercise-sets" value="${exercise.sets}" min="0"></td>
-                <td><input type="number" class="exercise-reps" value="${exercise.reps}" min="0"></td>
-                <td><input type="number" class="exercise-carga" value="${exercise.carga}" min="0"></td>
-            `;
+      regionSelect.addEventListener('change', e => updateExerciseSelect(e.target.value, ''));
 
-            const regionSelect = tr.querySelector('.region-select');
-            const exerciseSelect = tr.querySelector('.exercise-select');
-
-            regionSelect.innerHTML = `<option value="">Selecione a Região</option>`;
-            Object.keys(exercisesByRegion).forEach(region => {
-                const option = document.createElement('option');
-                option.value = region;
-                option.textContent = region;
-                regionSelect.appendChild(option);
-            });
-
-            function updateExerciseSelect(selectedRegion, selectedExercise) {
-                exerciseSelect.innerHTML = `<option value="">Selecione o Exercício</option>`;
-                if (selectedRegion && exercisesByRegion[selectedRegion]) {
-                    exercisesByRegion[selectedRegion].forEach(ex => {
-                        const option = document.createElement('option');
-                        option.value = ex;
-                        option.textContent = ex;
-                        if (ex === selectedExercise) { option.selected = true; }
-                        exerciseSelect.appendChild(option);
-                    });
-                }
-            }
-
-            regionSelect.addEventListener('change', (e) => {
-                updateExerciseSelect(e.target.value, '');
-            });
-
-            if (exercise.nome) {
-                const parts = exercise.nome.split(' - ');
-                const region = parts[0];
-                const exerciseName = parts[1];
-                if (regionSelect.querySelector(`option[value="${region}"]`)) {
-                    regionSelect.value = region;
-                    updateExerciseSelect(region, exerciseName);
-                }
-            }
-
-            return tr;
+      // se veio preenchido (ex.nome = "Região - Exercício")
+      if (exercise.nome){
+        const [reg, exName] = exercise.nome.split(' - ');
+        if (regionSelect.querySelector(`option[value="${reg}"]`)){
+          regionSelect.value = reg;
+          updateExerciseSelect(reg, exName);
         }
+      }
 
-        function createWorkoutCard(workout = { name: 'Novo Treino', exercises: [] }, workoutId = null) {
-            const card = document.createElement('section');
-            card.className = 'card';
-            card.dataset.workoutId = workoutId;
+      return tr;
+    }
 
-            card.innerHTML = `
-                <div class="workout-title">
-                    <input type="text" class="workout-name" value="${workout.name}">
-                    <button class="delete-btn" data-action="delete-workout">&times;</button>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Exercício</th>
-                            <th>Séries</th>
-                            <th>Reps</th>
-                            <th>Carga (kg)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="exercises-list"></tbody>
-                </table>
-                <button class="add-exercise-btn">Adicionar Exercício</button>
-            `;
+    function createWorkoutCard(workout = { name:'Novo Treino', exercises:[] }){
+      const card = document.createElement('section');
+      card.className = 'card';
 
-            const exercisesList = card.querySelector('.exercises-list');
-            workout.exercises.forEach(ex => { exercisesList.appendChild(createExerciseRow(ex)); });
+      card.innerHTML = `
+        <div class="workout-title">
+          <input type="text" class="workout-name" value="${workout.name}">
+          <button class="delete-btn" title="Excluir treino">&times;</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Exercício</th><th>Séries</th><th>Reps</th><th>Carga (kg)</th></tr>
+          </thead>
+          <tbody class="exercises-list"></tbody>
+        </table>
+        <button class="add-exercise-btn">Adicionar Exercício</button>
+      `;
 
-            card.querySelector('.add-exercise-btn').addEventListener('click', () => {
-                exercisesList.appendChild(createExerciseRow());
-            });
+      const list = card.querySelector('.exercises-list');
+      (workout.exercises || []).forEach(ex => list.appendChild(createExerciseRow(ex)));
 
-            card.querySelector('.delete-btn').addEventListener('click', () => {
-                if (confirm("Tem certeza que deseja excluir este treino?")) {
-                    document.getElementById('workouts-container').removeChild(card);
-                }
-            });
+      card.querySelector('.add-exercise-btn').addEventListener('click', () => {
+        list.appendChild(createExerciseRow());
+      });
 
-            return card;
+      card.querySelector('.delete-btn').addEventListener('click', () => {
+        if (confirm('Tem certeza que deseja excluir este treino?')) {
+          workoutsContainer.removeChild(card);
         }
+      });
 
-        async function loadWorkouts() {
-            await loadExercisesByRegion();
-            workoutsContainer.appendChild(createWorkoutCard());
-        }
+      return card;
+    }
 
-        async function saveAllWorkouts() {
-            const workoutsToSave = [];
-            const workoutCards = workoutsContainer.querySelectorAll('.card');
-            lastSavedWorkouts = [];
+    async function loadInitial(){
+      await loadExercisesByRegion();
+      workoutsContainer.appendChild(createWorkoutCard());
+    }
 
-            for (const card of workoutCards) {
-                const workoutName = card.querySelector('.workout-name').value;
-                const exercises = [];
-                const exerciseRows = card.querySelectorAll('.exercises-list tr');
+    async function saveAllWorkouts(){
+      lastSavedWorkouts = [];
+      const cards = workoutsContainer.querySelectorAll('.card');
 
-                exerciseRows.forEach(row => {
-                    const region = row.querySelector('.region-select').value;
-                    const name = row.querySelector('.exercise-select').value;
-                    const sets = parseFloat(row.querySelector('.exercise-sets').value);
-                    const reps = parseFloat(row.querySelector('.exercise-reps').value);
-                    const carga = parseFloat(row.querySelector('.exercise-carga').value);
-                    if (name) { exercises.push({ nome: `${region} - ${name}`, sets, reps, carga }); }
-                });
+      for (const card of cards){
+        const name = (card.querySelector('.workout-name').value || '').trim();
+        const rows = card.querySelectorAll('.exercises-list tr');
+        const exercises = [];
 
-                if (workoutName && exercises.length > 0) {
-                    workoutsToSave.push({ name: workoutName, exercises });
-                }
-            }
-
-            for (const workout of workoutsToSave) {
-                const docRef = await addDoc(collection(db, 'users', userId, 'workouts'), workout);
-                lastSavedWorkouts.push({ id: docRef.id, name: workout.name });
-            }
-
-            alert("Treinos salvos com sucesso!");
-            showDayAssignmentPanel();
-        }
-
-        // ====== NOVO: clonar treino quando reutilizado em mais de um dia ======
-        async function cloneWorkoutForDay(baseWorkoutId, dayLabel) {
-            const srcRef = doc(db, 'users', userId, 'workouts', baseWorkoutId);
-            const snap = await getDoc(srcRef);
-            if (!snap.exists()) throw new Error('Treino base não encontrado para clonagem.');
-
-            const data = snap.data();
-            const newData = {
-                ...data,
-                name: `${data.name || data.nome || 'Treino'} (${dayLabel})`
-            };
-            const newRef = await addDoc(collection(db, 'users', userId, 'workouts'), newData);
-            return newRef.id;
-        }
-
-        // (Opcional/robusto) clonar overrides semanais existentes para manter consistência
-        async function cloneWeeklyOverrides(oldId, newId) {
-            for (let wk = 1; wk <= 12; wk++) {
-                const oldRef = doc(db, `users/${userId}/weeks/${wk}/workouts/${oldId}`);
-                const oldSnap = await getDoc(oldRef);
-                if (oldSnap.exists()) {
-                    const newRef = doc(db, `users/${userId}/weeks/${wk}/workouts/${newId}`);
-                    await setDoc(newRef, oldSnap.data(), { merge: true });
-                }
-            }
-        }
-
-        function showDayAssignmentPanel() {
-            dayAssignmentPanel.style.display = 'block';
-            assignmentList.innerHTML = '';
-
-            lastSavedWorkouts.forEach(workout => {
-                const assignmentItem = document.createElement('div');
-                assignmentItem.className = 'assignment-item';
-                assignmentItem.innerHTML = `
-                    <h4>${workout.name}</h4>
-                    <div class="day-selection" data-workout-id="${workout.id}"></div>
-                `;
-
-                const daySelection = assignmentItem.querySelector('.day-selection');
-                for (let i = 1; i <= 7; i++) {
-                    const inputId = `day-${workout.id}-${i}`;
-                    daySelection.innerHTML += `
-                        <input type="checkbox" id="${inputId}" value="Dia ${i}">
-                        <label for="${inputId}">Dia ${i}</label>
-                    `;
-                }
-
-                assignmentList.appendChild(assignmentItem);
-            });
-
-            // evita listeners duplicados
-            saveScheduleBtn.onclick = saveWorkoutSchedule;
-        }
-
-        // ====== SUBSTITUI a versão antiga: agora clona quando necessário ======
-        async function saveWorkoutSchedule() {
-            const workoutSchedule = {};
-            const firstUseByWorkoutId = new Set(); // controla primeira utilização
-
-            const assignmentItems = assignmentList.querySelectorAll('.assignment-item');
-            for (const item of assignmentItems) {
-                const baseWorkoutId = item.querySelector('.day-selection').dataset.workoutId;
-                const checked = item.querySelectorAll('input[type="checkbox"]:checked');
-
-                for (const cb of checked) {
-                    const day = cb.value; // "Dia 1", "Dia 5", etc.
-                    let chosenId = baseWorkoutId;
-
-                    if (firstUseByWorkoutId.has(baseWorkoutId)) {
-                        // já usado em outro dia -> clona
-                        chosenId = await cloneWorkoutForDay(baseWorkoutId, day);
-                        // opcional/robusto: clonar overrides semanais se existirem
-                        await cloneWeeklyOverrides(baseWorkoutId, chosenId);
-                    } else {
-                        // primeira vez que esse treino é usado
-                        firstUseByWorkoutId.add(baseWorkoutId);
-                    }
-
-                    workoutSchedule[day] = chosenId;
-                }
-            }
-
-            const userRef = doc(db, 'users', userId);
-            await setDoc(userRef, { workoutSchedule }, { merge: true });
-
-            alert("Programação de treinos salva com sucesso!");
-            window.location.href = `treino.html?ws=${userId}`;
-        }
-
-        addWorkoutBtn.addEventListener('click', () => {
-            workoutsContainer.appendChild(createWorkoutCard());
+        rows.forEach(r => {
+          const region = r.querySelector('.region-select').value;
+          const exName = r.querySelector('.exercise-select').value;
+          const sets  = parseFloat(r.querySelector('.exercise-sets').value)  || 0;
+          const reps  = parseFloat(r.querySelector('.exercise-reps').value)  || 0;
+          const carga = parseFloat(r.querySelector('.exercise-carga').value) || 0;
+          if (exName) exercises.push({ nome: `${region} - ${exName}`, sets, reps, carga });
         });
 
-        saveAllBtn.addEventListener('click', saveAllWorkouts);
+        if (name && exercises.length){
+          const docRef = await addDoc(collection(db, 'users', userId, 'workouts'), { name, exercises });
+          lastSavedWorkouts.push({ id: docRef.id, name });
+        }
+      }
 
-        (async function init() {
-            await loadExercisesByRegion();
-            await loadWorkouts();
-        })();
+      if (!lastSavedWorkouts.length){
+        alert('Nada para salvar. Adicione pelo menos um exercício.');
+        return;
+      }
 
+      alert('Treinos salvos com sucesso!');
+      showDayAssignmentPanel();
+    }
 
-(function () {
-    if (!('serviceWorker' in navigator)) return;
-    // Pages roda em HTTPS, então ok registrar:
-    navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
-  })();
+    // Clona treino quando usado em mais de um dia
+    async function cloneWorkoutForDay(baseWorkoutId, dayLabel){
+      const srcRef = doc(db, 'users', userId, 'workouts', baseWorkoutId);
+      const snap = await getDoc(srcRef);
+      if (!snap.exists()) throw new Error('Treino base não encontrado.');
+      const data = snap.data();
+      const newData = { ...data, name: `${data.name || 'Treino'} (${dayLabel})` };
+      const newRef = await addDoc(collection(db, 'users', userId, 'workouts'), newData);
+      return newRef.id;
+    }
 
+    // (Opcional) clona overrides semanais, se você já tiver salvo algo em users/{id}/weeks/{wk}/workouts/{wid}
+    async function cloneWeeklyOverrides(oldId, newId){
+      for (let wk = 1; wk <= 12; wk++){
+        const oldRef = doc(db, `users/${userId}/weeks/${wk}/workouts/${oldId}`);
+        const oldSnap = await getDoc(oldRef);
+        if (oldSnap.exists()){
+          const newRef = doc(db, `users/${userId}/weeks/${wk}/workouts/${newId}`);
+          await setDoc(newRef, oldSnap.data(), { merge:true });
+        }
+      }
+    }
 
-        
-    </script>
+    function showDayAssignmentPanel(){
+      dayAssignmentPanel.style.display = 'block';
+      assignmentList.innerHTML = '';
+
+      lastSavedWorkouts.forEach(w => {
+        const item = document.createElement('div');
+        item.className = 'assignment-item';
+        item.innerHTML = `
+          <h4>${w.name}</h4>
+          <div class="day-selection" data-workout-id="${w.id}"></div>
+        `;
+        const sel = item.querySelector('.day-selection');
+        for (let i=1; i<=7; i++){
+          const id = `day-${w.id}-${i}`;
+          sel.insertAdjacentHTML('beforeend', `
+            <input type="checkbox" id="${id}" value="Dia ${i}"><label for="${id}">Dia ${i}</label>
+          `);
+        }
+        assignmentList.appendChild(item);
+      });
+
+      saveScheduleBtn.onclick = saveWorkoutSchedule;
+    }
+
+    async function saveWorkoutSchedule(){
+      const workoutSchedule = {};
+      const firstUse = new Set(); // primeira utilização de cada treino base
+
+      const items = assignmentList.querySelectorAll('.assignment-item');
+      for (const item of items){
+        const baseId = item.querySelector('.day-selection').dataset.workoutId;
+        const checks = item.querySelectorAll('input[type="checkbox"]:checked');
+
+        for (const cb of checks){
+          const day = cb.value; // "Dia 1", etc.
+          let chosenId = baseId;
+
+          if (firstUse.has(baseId)){
+            // segunda (ou mais) utilização → clonar
+            chosenId = await cloneWorkoutForDay(baseId, day);
+            await cloneWeeklyOverrides(baseId, chosenId); // opcional
+          } else {
+            firstUse.add(baseId);
+          }
+          workoutSchedule[day] = chosenId;
+        }
+      }
+
+      const userRef = doc(db, 'users', userId);
+      await setDoc(userRef, { workoutSchedule }, { merge:true });
+
+      alert('Programação de treinos salva com sucesso!');
+      location.href = `treino.html?ws=${userId}`;
+    }
+
+    addWorkoutBtn.addEventListener('click', () => {
+      workoutsContainer.appendChild(createWorkoutCard());
+    });
+    saveAllBtn.addEventListener('click', saveAllWorkouts);
+
+    // init
+    (async function init(){
+      await loadExercisesByRegion();
+      await loadInitial();
+    })();
+  </script>
+
+  <!-- Service Worker (uma vez só) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
+    }
+  </script>
 </body>
 </html>
-
-
-
