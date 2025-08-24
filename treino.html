@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+  <meta charset="utf-8" />
 
+  <!-- iOS / PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Wave Training">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Periodização Ondulatória — Treino 6x/semana</title>
 
-  <!-- PWA -->
+  <!-- Manifest / tema -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f1115">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-  <!-- CSS responsivo -->
   <style>
     :root{
       --bg:#0f1115; --panel:#151923; --muted:#a6adbb; --text:#e8ecf1;
@@ -26,28 +23,36 @@
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;padding-bottom:env(safe-area-inset-bottom, 16px);}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;
+      padding-bottom:env(safe-area-inset-bottom, 16px);
+    }
 
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(15,17,21,.98), rgba(15,17,21,.86));position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(6px)}
-    h1{font-size:clamp(1.15rem, 3.5vw, 1.6rem);margin:0 0 4px 0}
-    .sub{font-size:12px;color:var(--muted)}
-    .wrap{max-width:1200px;margin:0 auto;padding:12px}
-    .rowlabel{color:var(--muted);font-size:12px;margin:6px 2px}
+    header{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:12px 16px; border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(15,17,21,.98), rgba(15,17,21,.86));
+      position:sticky; top:0; z-index:5; backdrop-filter:saturate(140%) blur(6px)
+    }
+    h1{font-size:clamp(1.15rem, 3.5vw, 1.6rem); margin:0 0 4px}
+    .sub{font-size:12px; color:var(--muted)}
+    .wrap{max-width:1200px; margin:0 auto; padding:12px}
+    .rowlabel{color:var(--muted); font-size:12px; margin:6px 2px}
 
-    /* botões e select */
+    /* controles */
+    .controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
     select, button{font:600 14px/1 system-ui; border:0; border-radius:10px; padding:10px 12px}
     button{background:var(--accent); color:#07202a; cursor:pointer}
     button:hover{background:var(--accent2)}
     select{background:var(--card); color:var(--text); border:1px solid var(--border)}
-    @media (max-width:360px){
-      header .controls > *{flex:1 1 auto} button, select{width:100%}
-    }
+    @media (max-width:360px){ .controls>*{flex:1 1 auto} button, select{width:100%} }
 
-    /* cards genéricos */
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;overflow:hidden}
-    .title{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-    .small{font-size:11px;color:var(--muted)}
-    .empty{padding:10px;border:1px dashed var(--border);border-radius:10px;color:var(--muted);text-align:center}
+    /* cards */
+    .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; overflow:hidden}
+    .title{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px}
+    .small{font-size:11px; color:var(--muted)}
+    .empty{padding:10px; border:1px dashed var(--border); border-radius:10px; color:var(--muted); text-align:center}
 
     /* carrossel de dias */
     .days{display:flex; gap:12px; padding:12px; overflow-x:auto; scroll-snap-type:x mandatory}
@@ -58,27 +63,28 @@
       background:var(--card); border:1px solid rgba(255,255,255,.06);
       border-radius:16px; padding:12px; box-shadow:0 6px 22px rgba(0,0,0,.25);
     }
-    .rest{border:1px dashed var(--border);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;min-height:160px}
+    .rest{border:1px dashed var(--border); background:transparent; color:var(--muted); display:flex; align-items:center; justify-content:center; min-height:160px}
 
-    /* tabela do dia */
-    table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:auto}
-    th{font-size:12px;color:var(--muted);font-weight:600;text-align:left}
-    td{font-size:.95rem;padding:6px 8px;vertical-align:middle;background:#11161f;border-radius:8px}
-    td:first-child{width:45%;word-break:break-word;hyphens:auto;line-height:1.2}
+    /* tabela */
+    table{width:100%; border-collapse:separate; border-spacing:0 8px; table-layout:auto}
+    th{font-size:12px; color:var(--muted); font-weight:600; text-align:left}
+    td{font-size:.95rem; padding:6px 8px; vertical-align:middle; background:#11161f; border-radius:8px}
+    td:first-child{width:45%; word-break:break-word; hyphens:auto; line-height:1.2}
     .sets-input,.reps-input,.carga-input{
-      width:3.8ch;text-align:center;font-weight:700;font-size:.95rem;border-radius:8px;border:1px solid #2a3140;background:#0c1119;color:var(--text);padding:6px 4px
+      width:3.8ch; text-align:center; font-weight:700; font-size:.95rem;
+      border-radius:8px; border:1px solid #2a3140; background:#0c1119; color:var(--text); padding:6px 4px
     }
 
     /* gráficos */
     .charts{margin-top:18px}
-    .chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}
-    .chart-title{font-size:13px;color:var(--muted);margin:0 0 8px}
+    .chart-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; margin:10px 0}
+    .chart-title{font-size:13px; color:var(--muted); margin:0 0 8px}
     .chart-wrap{height:420px}
 
     /* total da sessão */
-    .totals{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:8px}
+    .totals{display:flex; gap:12px; align-items:center; justify-content:flex-end; margin-top:8px}
 
-    /* esconder blocos vazios */
+    /* esconder vazios */
     .card:empty,[data-empty="true"]{display:none !important}
 
     @media (min-width:992px){
@@ -94,7 +100,7 @@
       <div class="sub">Workspace: <code id="ws-label"></code></div>
       <div class="small" id="src-badge"></div>
     </div>
-    <div class="controls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="controls">
       <label>Semana:
         <select id="week"></select>
       </label>
@@ -142,7 +148,7 @@
       enableIndexedDbPersistence, query, getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // === Firebase config (o seu) ===
+    // Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAN9B0dCAIfVPmGZ6qUUfC8k9KnrUT5ymI",
       authDomain: "treino-ondulatoriov5.firebaseapp.com",
@@ -152,11 +158,10 @@
       appId: "1:152908725685:web:ca42dc3714fe07af162dfc"
     };
 
-    // Workspace (?ws=) — ID do usuário
+    // workspace (?ws=)
     const params = new URLSearchParams(location.search);
-    const rawWs = (params.get('ws') || '').trim();
-    if (!rawWs) { location.href = 'index.html'; }
-    const userId = rawWs;
+    const userId = (params.get('ws') || '').trim();
+    if (!userId) location.href = 'index.html';
     document.getElementById('ws-label').textContent = userId;
 
     // Firebase
@@ -165,7 +170,7 @@
     const db = getFirestore(app);
     enableIndexedDbPersistence(db).catch(()=>{});
 
-    // Ciclo de 12 semanas
+    // 12 semanas
     const weeks = [
       {id:1,reps:"12–15",treg:false},{id:2,reps:"4–6",treg:false},{id:3,reps:"8–10",treg:false},{id:4,reps:"12–15",treg:false},
       {id:5,reps:"12–15",treg:true},{id:6,reps:"4–6",treg:false},{id:7,reps:"8–10",treg:false},{id:8,reps:"12–15",treg:false},
@@ -178,33 +183,29 @@
     const workoutsRow = document.getElementById('workouts-row');
     const avgChartMessageDiv = document.getElementById('avgChart-message');
 
-    // Preenche o seletor de semanas + rótulo de reps
-    weeks.forEach(week => {
-      const option = document.createElement('option');
-      option.value = week.id;
-      option.textContent = `Semana ${week.id}`;
-      weekSelect.appendChild(option);
+    // preencher semanas
+    weeks.forEach(w => {
+      const op = document.createElement('option');
+      op.value = w.id; op.textContent = `Semana ${w.id}`;
+      weekSelect.appendChild(op);
     });
     if (!weekSelect.value) weekSelect.value = weeks[0].id;
     repRangeLbl.textContent = weeks[0].reps + (weeks[0].treg ? ' · TREG' : '');
 
-    // Helpers
+    // helpers
     const el=(t,a={})=>Object.assign(document.createElement(t),a);
     const formatNum=n=>(Number(n)||0).toLocaleString('pt-BR',{maximumFractionDigits:2});
     const vol=o=>Math.round((Number(o.sets)||0)*(Number(o.reps)||0)*(Number(o.carga)||0)*100)/100;
-    function sessionSum(arr){ return arr.reduce((a,o)=>a+vol(o),0); }
+    const sessionSum = arr => arr.reduce((a,o)=>a+vol(o),0);
+
     function attachSessionFooter(container, data){
-      const totalsWrap = el('div',{className:'totals'});
-      totalsWrap.append(el('div',{textContent:`Total da sessão: ${formatNum(sessionSum(data))}`}));
-      container.append(totalsWrap);
+      const totals = el('div',{className:'totals'});
+      totals.append(el('div',{textContent:`Total da sessão: ${formatNum(sessionSum(data))}`}));
+      container.append(totals);
     }
 
-    // Monta um card de dia
     function createWorkoutDayCard(dayName, workout, workoutId) {
-      const card = document.createElement('section');
-      card.className = 'day-card card workout-day-card';
-      card.dataset.workoutId = workoutId;
-
+      const card = el('section',{className:'day-card card workout-day-card', dataset:{workoutId}});
       const title = el('div',{className:'title'});
       title.innerHTML = `<h3>${dayName} · ${(workout.name ?? workout.nome) || 'Treino sem nome'}</h3>
                          <button class="edit-btn">Editar</button>`;
@@ -212,9 +213,7 @@
 
       const table = el('table');
       table.innerHTML = `
-        <thead>
-          <tr><th>Exercício</th><th>Séries</th><th>Reps</th><th>Carga (kg)</th><th>Volume</th></tr>
-        </thead>
+        <thead><tr><th>Exercício</th><th>Séries</th><th>Reps</th><th>Carga (kg)</th><th>Volume</th></tr></thead>
         <tbody></tbody>`;
       const tbody = table.querySelector('tbody');
 
@@ -267,46 +266,39 @@
       await loadUserSchedule();
     }
 
-    // Carrega o cronograma do usuário
     async function loadUserSchedule() {
       const selectedWeek = weekSelect.value;
-      const weekMeta = weeks.find(w => w.id == selectedWeek);
-      repRangeLbl.textContent = weekMeta ? weekMeta.reps + (weekMeta.treg ? ' · TREG' : '') : '—';
+      const wm = weeks.find(w => w.id == selectedWeek);
+      repRangeLbl.textContent = wm ? wm.reps + (wm.treg ? ' · TREG' : '') : '—';
 
-      const userRef = doc(db, 'users', userId);
-      const userSnap = await getDoc(userRef);
+      const userSnap = await getDoc(doc(db, 'users', userId));
       workoutsRow.innerHTML = '';
 
       if (userSnap.exists() && userSnap.data().workoutSchedule) {
         const schedule = userSnap.data().workoutSchedule;
-        const workoutIds = Object.values(schedule);
-        const uniqueIds = [...new Set(workoutIds)];
+        const ids = [...new Set(Object.values(schedule))];
 
-        const baseSnaps = await Promise.all(uniqueIds.map(id => getDoc(doc(db, `users/${userId}/workouts/${id}`))));
-        const weekSnaps = await Promise.all(uniqueIds.map(id => getDoc(doc(db, `users/${userId}/weeks/${selectedWeek}/workouts/${id}`))));
-
+        const baseSnaps = await Promise.all(ids.map(id => getDoc(doc(db, `users/${userId}/workouts/${id}`))));
+        const weekSnaps = await Promise.all(ids.map(id => getDoc(doc(db, `users/${userId}/weeks/${selectedWeek}/workouts/${id}`))));
         const map = {};
         baseSnaps.forEach(s => { if (s.exists()) map[s.id] = {...(map[s.id]||{}), ...s.data()}; });
         weekSnaps.forEach(s => { if (s.exists()) map[s.id] = {...(map[s.id]||{}), ...s.data()}; });
 
         const days = ['Dia 1','Dia 2','Dia 3','Dia 4','Dia 5','Dia 6','Dia 7'];
-        const allExercises = new Set();
+        const allEx = new Set();
 
         for (const day of days){
           const wid = schedule[day];
           if (wid && map[wid]){
-            const card = createWorkoutDayCard(day, map[wid], wid);
-            workoutsRow.appendChild(card);
-            (map[wid].exercises||[]).forEach(ex => allExercises.add(ex.nome));
+            workoutsRow.appendChild(createWorkoutDayCard(day, map[wid], wid));
+            (map[wid].exercises||[]).forEach(ex => allEx.add(ex.nome));
           } else {
-            const rest = document.createElement('section');
-            rest.className = 'day-card card rest';
-            rest.textContent = 'DESCANSO';
+            const rest = el('section',{className:'day-card card rest', textContent:'DESCANSO'});
             workoutsRow.appendChild(rest);
           }
         }
 
-        const sorted = Array.from(allExercises).sort();
+        const sorted = Array.from(allEx).sort();
         displayAllWeeklyExercises(sorted);
         await updateCharts();
       } else {
@@ -323,17 +315,9 @@
     function displayAllWeeklyExercises(exercises) {
       allExercisesList.innerHTML = '';
       if (exercises.length > 0) {
-        const ul = document.createElement('ul');
-        ul.style.listStyle = 'none';
-        ul.style.padding = '0';
-        ul.style.margin = '0';
-        ul.style.columnCount = '2';
-        ul.style.gap = '10px';
+        const ul = el('ul'); ul.style.listStyle='none'; ul.style.padding='0'; ul.style.margin='0'; ul.style.columnCount='2'; ul.style.gap='10px';
         exercises.forEach(ex => {
-          const li = document.createElement('li');
-          const name = ex.split(' - ')[1] || ex;
-          li.textContent = name;
-          ul.appendChild(li);
+          const li = el('li'); li.textContent = (ex.split(' - ')[1] || ex); ul.appendChild(li);
         });
         allExercisesList.appendChild(ul);
       } else {
@@ -341,7 +325,7 @@
       }
     }
 
-    // ===== Gráficos =====
+    // === gráficos ===
     let weeklyChart=null;
     async function buildChartsIfNeeded(){
       const weeklyVolumes = await getAllWeeksVolumes();
@@ -361,27 +345,25 @@
 
       if(weeklyChart){ weeklyChart.data.datasets[0].data = weeklyVolumes; weeklyChart.update(); }
 
+      const msg = document.getElementById('avgChart-message');
+      const container = document.getElementById('custom-avg-chart');
       if(avgRows.length > 0) {
-        avgChartMessageDiv.style.display = 'none';
-        const container = document.getElementById('custom-avg-chart');
-        container.innerHTML = '';
+        msg.style.display = 'none'; container.innerHTML = '';
         const maxReps = Math.max(...avgRows.map(r => r.avgReps));
         avgRows.forEach(row => {
-          const item = el('div', { className: 'avg-rep-item', style:'display:flex;align-items:center;margin-bottom:6px;font-size:12px' });
+          const item = el('div', { style:'display:flex;align-items:center;margin-bottom:6px;font-size:12px' });
           const label = el('span', { style:'width:40%;text-align:right;padding-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis', textContent: row.nome });
           const barC = el('div', { style:'flex:1;background:var(--bg);border-radius:4px;height:12px;overflow:hidden' });
           const bar = el('div', { style:`height:100%;background:linear-gradient(90deg, var(--accent), var(--accent2));width:${(row.avgReps/maxReps)*100}%` });
           barC.appendChild(bar); item.appendChild(label); item.appendChild(barC); container.appendChild(item);
         });
       } else {
-        avgChartMessageDiv.style.display = 'block';
-        document.getElementById('custom-avg-chart').innerHTML = '';
+        msg.style.display = 'block'; container.innerHTML = '';
       }
     }
     async function getWeekVolume(weekId){
       const snap = await getDocs(query(collection(db, `users/${userId}/weeks/${weekId}/workouts`)));
-      let total = 0;
-      snap.forEach(d => (d.data().exercises||[]).forEach(ex => total += vol(ex)));
+      let total = 0; snap.forEach(d => (d.data().exercises||[]).forEach(ex => total += vol(ex)));
       return total;
     }
     async function getAllWeeksVolumes(){ return Promise.all(weeks.map(w => getWeekVolume(w.id))); }
@@ -415,12 +397,10 @@
     })();
   </script>
 
-  <!-- SW (uma vez só) -->
   <script>
-    (function () {
-      if (!('serviceWorker' in navigator)) return;
+    if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
-    })();
+    }
   </script>
 </body>
 </html>
