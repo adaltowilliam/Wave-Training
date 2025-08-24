@@ -2,9 +2,9 @@
   "name": "Wave Training",
   "short_name": "WaveTraining",
   "lang": "pt-BR",
-  "id": "./",
-  "start_url": "./index.html",
-  "scope": "./",
+  "id": "/Wave-Training/",
+"start_url": "/Wave-Training/index.html",
+"scope": "/Wave-Training/"
   "display": "standalone",
   "background_color": "#0f1115",
   "theme_color": "#0f1115",
@@ -20,3 +20,4 @@
     { "name": "Montar Treino", "short_name": "Builder", "url": "./workout_builder.html" }
   ]
 }
+
