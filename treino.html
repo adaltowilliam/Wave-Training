@@ -78,7 +78,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="/Treinov5/icons/icon-180.png">
-  <link rel="manifest" href="/Treinov5/manifest.json">
+  
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -294,6 +294,8 @@ const userId = rawWs;
     const customAvgChart = document.getElementById('custom-avg-chart');
     const allExercisesList = document.getElementById('all-exercises-list');
     const workoutsRow = document.getElementById('workouts-row');
+    workoutsRow.classList.add('days'); // ativa as regras do carrossel responsivo
+
     const avgChartMessageDiv = document.getElementById('avgChart-message');
 
     // Preenche o seletor de semanas
@@ -401,7 +403,9 @@ if (weeks && weeks.length > 0) {
                 const workoutId = schedule[day];
                 if (workoutId && workoutsMap[workoutId]) {
                     const workoutData = workoutsMap[workoutId];
-                    const dayCard = createWorkoutDayCard(day, workoutData, workoutId);
+                    const card = document.createElement('section');
+                    card.className = 'day card workout-day-card day-card'; // <-- adicionei day-card
+
                     workoutsRow.appendChild(dayCard);
                     
                     workoutData.exercises.forEach(ex => {
@@ -667,9 +671,10 @@ await setDoc(workoutRef, { name: nameFromTitle, exercises }, { merge: true });
   </script>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/Treinov5/service-worker.js');
-    }
+(function () {
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch(console.warn);
+  })();
 
 
 (function () {
