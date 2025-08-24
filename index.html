@@ -25,7 +25,12 @@
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{margin:0; background:var(--bg); color:var(--text); font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+    body{
+      margin:0;
+      background: transparent; /* <<< agora deixa o style.css controlar o fundo */
+      color:var(--text);
+      font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;
+    }
     .app-root{min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 16px)}
     .container{width:min(640px, 100%); background:transparent}
     h1{margin:0 0 12px; font-size:clamp(1.3rem, 4.5vw, 2rem)}
@@ -151,4 +156,3 @@
   </script>
 </body>
 </html>
-
