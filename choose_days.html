@@ -9,10 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <!-- Chama a imagem de fundo -->
-  <link rel="stylesheet" href="style.css?v=1">
+  <!-- CSS Global (com o fundo) -->
+  <link rel="stylesheet" href="style.css?v=2">
 
-  
   <!-- Manifest / tema -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f1115">
@@ -27,8 +26,19 @@
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{margin:0; background:var(--bg); color:var(--text); font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial}
-    .app-root{min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+
+    /* ✅ deixa o style.css mostrar o fundo */
+    body{
+      margin:0;
+      background: transparent;
+      color:var(--text);
+      font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;
+    }
+
+    .app-root{
+      min-height:100dvh; display:flex; align-items:center; justify-content:center;
+      padding:24px; padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px)
+    }
     .container{width:min(640px, 100%); background:transparent; text-align:center}
     h1{margin:0 0 8px; font-size:clamp(1.3rem, 4.5vw, 2rem)}
     p{margin:0 0 16px; color:var(--muted)}
@@ -118,4 +128,3 @@
   </script>
 </body>
 </html>
-
