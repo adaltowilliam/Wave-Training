@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Escolha os Dias de Treino</title>
+    <style>
+        :root { --bg: #0f1115; --panel: #151923; --text: #e8ecf1; --accent: #6ee7ff; --card: #1b2230; --border: #273043; }
+        body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, Segoe UI, Roboto, Helvetica, Arial; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        .container { max-width: 600px; padding: 20px; text-align: center; }
+        h1 { font-size: 2em; color: var(--text); }
+        .days-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .day-btn { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; text-align: left; cursor: pointer; transition: background-color 0.2s; font-weight: bold; }
+        .day-btn:hover { background-color: #2a374c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="welcome-message">Olá, usuário!</h1>
+        <p>Quantos dias por semana você deseja treinar?</p>
+        <div class="days-list" id="days-list">
+            <button class="day-btn" data-days="3">3 Dias por semana</button>
+            <button class="day-btn" data-days="4">4 Dias por semana</button>
+            <button class="day-btn" data-days="5">5 Dias por semana</button>
+            <button class="day-btn" data-days="6">6 Dias por semana</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+        import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+        // === Sua config do Firebase ===
+        const firebaseConfig = {
+          apiKey: "AIzaSyAN9B0dCAIfVPmGZ6qUUfC8k9KnrUT5ymI",
+          authDomain: "treino-ondulatoriov5.firebaseapp.com",
+          projectId: "treino-ondulatoriov5",
+          storageBucket: "treino-ondulatoriov5.firebasestorage.app",
+          messagingSenderId: "152908725685",
+          appId: "1:152908725685:web:ca42dc3714fe07af162dfc"
+        };
+        
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        signInAnonymously(auth);
+
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('ws');
+
+        if (!userId) {
+            window.location.href = 'index.html';
+        }
+
+        const welcomeMessage = document.getElementById('welcome-message');
+        const daysList = document.getElementById('days-list');
+
+        async function saveTrainingDays(days) {
+            const userRef = doc(db, 'users', userId);
+            await setDoc(userRef, { trainingDays: days }, { merge: true });
+            window.location.href = `workout_builder.html?ws=${userId}`;
+        }
+
+        async function loadUserName() {
+            const userRef = doc(db, 'users', userId);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const userName = userSnap.data().name;
+                welcomeMessage.textContent = `Olá, ${userName}!`;
+            }
+        }
+
+        daysList.addEventListener('click', (event) => {
+            const button = event.target.closest('.day-btn');
+            if (button) {
+                const days = parseInt(button.dataset.days);
+                if (!isNaN(days)) {
+                    saveTrainingDays(days);
+                }
+            }
+        });
+        
+        loadUserName();
+    </script>
+</body>
+</html>
